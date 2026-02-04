@@ -1,0 +1,6 @@
+backend/node_modules/
+backend/Mail/
+backend/.env
+test-app/node_modules/
+test-app/.env.local
+test-app/.env.production

@@ -1,0 +1,33 @@
+@media print {
+  body {
+    visibility: hidden;
+    counter-reset: page;
+  }
+  @page {
+    size: A4;
+    margin-bottom: 15mm;
+  }
+  .printable-table {
+    visibility: visible !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    padding-bottom: 25mm;
+    box-shadow: none;
+    border: none;
+    background: white;
+    color: black;
+     page-break-after: auto;
+  }
+  .printable-table table,
+  .printable-table th,
+  .printable-table td {
+    font-size: 8px !important;
+  }
+  .printable-table h2 {
+    font-size: 1.25rem !important; /* text-xl */
+  }
+}

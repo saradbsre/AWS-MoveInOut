@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark mode root variables */
+:root {
+  --bg-light: #ffffff;
+  --text-light: #000000;
+  --bg-dark: #1f2937;
+  --text-dark: #ffffff;
+}
+
+/* Light mode (default) */
+body {
+  font-family: 'Times New Roman', Times, serif;
+  background-color: var(--bg-light);
+  color: var(--text-light);
+  transition: background-color 0.3s ease, color 0.3s ease;
+} 
+
+/* Dark mode */
+.dark body {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+label {
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* Additional dark mode utilities */
+.dark {
+  color-scheme: dark;
+}
+
+/* @media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .print-container, .print-container * {
+    visibility: visible !important;
+  }
+  .print-container {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    background: white !important;
+    z-index: 9999 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+} */
+

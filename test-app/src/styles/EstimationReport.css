@@ -1,0 +1,97 @@
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-content {
+    padding: 5px !important;
+    page-break-after: avoid;
+    margin: 0 !important;
+    margin-top: 180px !important; /* Add space for fixed header */
+    margin-bottom: 10px !important; /* Add space for fixed footer */
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  @page {
+    margin: 0.5cm;
+    size: A4;
+  }
+  
+  /* Reduce all margins and padding for print */
+  .mb-6 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .mb-4 {
+    margin-bottom: 0.3rem !important;
+  }
+  
+  .mb-2 {
+    margin-bottom: 0.2rem !important;
+  }
+  
+  .mt-12 {
+    margin-top: 1rem !important;
+  }
+  
+  .mt-8 {
+    margin-top: 0.5rem !important;
+  }
+  
+  .p-8 {
+    padding: 0.5rem !important;
+  }
+  
+  .p-2 {
+    padding: 0.3rem !important;
+  }
+  
+  /* Reduce text size slightly */
+  .text-lg {
+    font-size: 0.95rem !important;
+  }
+  
+  h2 {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+  
+  /* Prevent page breaks inside elements */
+  table, .mb-6, h2, .flex {
+    page-break-inside: avoid;
+  }
+  
+  /* Ensure everything fits on one page */
+  .print-container {
+    height: auto;
+    overflow: visible;
+  }
+  
+  /* Scale down if still too large */
+  .print-content {
+    transform: scale(0.95);
+    transform-origin: top center;
+  }
+  
+  .print-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 1000;
+  }
+  
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 1000;
+  }
+}
