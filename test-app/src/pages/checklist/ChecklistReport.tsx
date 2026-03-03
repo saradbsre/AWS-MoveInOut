@@ -22,6 +22,7 @@ interface ChecklistItem {
   submissionDate: string;
   visitType: string; // "MOVE IN" or "MOVE OUT"
   building: string;
+  buildingDesc: string;
   unit: string;
   tenant: string;
   startDate: string;
@@ -431,7 +432,7 @@ return (
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">{checklist.refNum}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{checklist.tenant}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{checklist.building}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{checklist.buildingDesc}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{checklist.unit}</td>                    
                       <td className="px-6 py-4 whitespace-nowrap">{checklist.contractNo}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -546,7 +547,7 @@ return (
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">{checklist.refNum}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{checklist.tenant}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{checklist.building}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{checklist.buildingDesc}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{checklist.unit}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{checklist.contractNo}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -619,7 +620,7 @@ return (
           <td className="px-1 py-1 border border-black text-xs text-black text-nowrap">{checklist.visitType}</td>
           <td className="px-1 py-1 border border-black text-xs text-black text-center">{checklist.refNum}</td>
           <td className="px-1 py-1 border border-black text-xs text-black w-40 ">{checklist.tenant}</td>
-          <td className="px-1 py-1 border border-black text-xs text-black w-40 ">{checklist.building}</td>
+          <td className="px-1 py-1 border border-black text-xs text-black w-40 ">{checklist.buildingDesc}</td>
           <td className="px-1 py-1 border border-black text-xs text-black text-center text-nowrap">{checklist.unit}</td>
           <td className="px-1 py-1 border border-black text-xs text-black text-center">{checklist.contractNo}</td>
           <td className="px-1 py-1 border border-black text-xs text-black text-center">{checklist.startDate?.slice(0, 10)}</td>
