@@ -46,7 +46,8 @@ export default function TenantReport() {
   const [filterContractNo, setFilterContractNo] = useState('');
   const [orderBy, setOrderBy] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
-  // const [total, setTotal] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 25;
   const [sortColumn, setSortColumn] = useState<string>('submissionDate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -112,28 +113,41 @@ export default function TenantReport() {
   useEffect(() => {
     const fetchChecklists = async () => {
       setLoading(true);
-      const username = sessionStorage.getItem('username');
-      if (!username) {
-        setChecklists([]);
-        // setTotal(0);
-        setLoading(false);
-        return;
-      }
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory`;
+
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        pageSize: String(itemsPerPage),
+        orderBy,
+      });
+
+      if (filterDate) params.append('filterType', 'date');
+      if (filterDate) params.append('filterDate', filterDate);
+      if (filterBuilding) params.append('filterBuilding', filterBuilding);
+      if (filterUnit) params.append('filterUnit', filterUnit);
+      if (filterTechnician) params.append('filterTechnician', filterTechnician);
+      if (filterContractNo) params.append('filterContractNo', filterContractNo);
+
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory?${params.toString()}`;
       const response = await fetch(apiUrl, { credentials: 'include' });
       const data = await response.json();
+
       setChecklists(
-        data.checklists.map((item: any) => ({
+        (data.checklists || []).map((item: any) => ({
           ...item,
-          equipment: item.equipment ? (typeof item.equipment === 'string' ? JSON.parse(item.equipment) : item.equipment) : [],
-          files: item.files || []    // preserve files returned by backend
+          equipment: item.equipment
+            ? (typeof item.equipment === 'string' ? JSON.parse(item.equipment) : item.equipment)
+            : [],
+          files: item.files || []
         }))
       );
-      // setTotal(data.total);
+
+      setTotal(Number(data.total || 0));
+      setTotalPages(Number(data.totalPages || 1));
       setLoading(false);
     };
+
     fetchChecklists();
-  }, []);
+  }, [currentPage, orderBy, filterDate, filterBuilding, filterUnit, filterTechnician, filterContractNo]);
 
  const filteredChecklists = checklists
  
@@ -165,10 +179,8 @@ export default function TenantReport() {
     return 0;
   });
   
-  const paginatedChecklists = filteredChecklists.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedChecklists = checklists;
+
   useEffect(() => {
   const maxPage = Math.max(1, Math.ceil(filteredChecklists.length / itemsPerPage));
   if (currentPage > maxPage) {
@@ -561,12 +573,12 @@ return (
     Prev
   </button>
   <span>
-    Page {currentPage} of {Math.max(1, Math.ceil(filteredChecklists.length / itemsPerPage))}
+    Page {currentPage} of {totalPages}
   </span>
   <button
     className="px-3 py-1 rounded bg-gray-200"
     onClick={() => setCurrentPage(p => p + 1)}
-    disabled={currentPage >= Math.ceil(filteredChecklists.length / itemsPerPage)}
+    disabled={currentPage >= totalPages}
   >
     Next
   </button>

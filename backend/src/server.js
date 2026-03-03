@@ -520,29 +520,28 @@ app.get('/api/checklistshistory', async (req, res) => {
   try {
     const db = await connectEstate(req.session.companyConfig);
     const {
-      technician,
-      page = 1,
-      pageSize = 50,
+      page = '1',
+      pageSize = '25',
       filterType,
       filterDate,
       filterBuilding,
       filterUnit,
       filterTechnician,
+      filterContractNo,
       orderBy = 'desc'
     } = req.query;
 
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const pageSizeNum = 25; // force 25 per page
+    const offset = (pageNum - 1) * pageSizeNum;
+
     let where = 'WHERE 1=1';
-    if (filterType === 'date' && filterDate) {
-      where += ` AND CAST(sysdate AS DATE) = @filterDate`;
-    }
+    if (filterType === 'date' && filterDate) where += ` AND CAST(sysdate AS DATE) = @filterDate`;
     if (filterBuilding) where += ` AND build_id LIKE @filterBuilding`;
     if (filterUnit) where += ` AND unit_desc LIKE @filterUnit`;
     if (filterTechnician) where += ` AND userid LIKE @filterTechnician`;
+    if (filterContractNo) where += ` AND contract_id LIKE @filterContractNo`;
 
-    // Pagination
-    const offset = (parseInt(page) - 1) * parseInt(pageSize);
-
-    // Main query: group by refNum, get latest created_at per group
     const query = `
       SELECT *
       FROM (
@@ -556,32 +555,49 @@ app.get('/api/checklistshistory', async (req, res) => {
       OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
     `;
 
-    // Count query for total unique checklists
     const countQuery = `
       SELECT COUNT(DISTINCT refNum) AS total
       FROM checklist
       ${where};
     `;
 
-    // Prepare request
-    const request = db.request();
-    if (filterType === 'date' && filterDate) request.input('filterDate', sql.Date, filterDate);
-    if (filterBuilding) request.input('filterBuilding', sql.NVarChar, `%${filterBuilding}%`);
-    if (filterUnit) request.input('filterUnit', sql.NVarChar, `%${filterUnit}%`);
-    if (filterTechnician) request.input('filterTechnician', sql.NVarChar, `%${filterTechnician}%`);
-    request.input('offset', sql.Int, offset);
-    request.input('pageSize', sql.Int, parseInt(pageSize));
+    // use separate requests
+    const dataReq = db.request();
+    const countReq = db.request();
 
-    // Run queries
+    if (filterContractNo) {
+      dataReq.input('filterContractNo', sql.NVarChar, `%${filterContractNo}%`);
+      countReq.input('filterContractNo', sql.NVarChar, `%${filterContractNo}%`);
+    }
+
+    if (filterType === 'date' && filterDate) {
+      dataReq.input('filterDate', sql.Date, filterDate);
+      countReq.input('filterDate', sql.Date, filterDate);
+    }
+    if (filterBuilding) {
+      dataReq.input('filterBuilding', sql.NVarChar, `%${filterBuilding}%`);
+      countReq.input('filterBuilding', sql.NVarChar, `%${filterBuilding}%`);
+    }
+    if (filterUnit) {
+      dataReq.input('filterUnit', sql.NVarChar, `%${filterUnit}%`);
+      countReq.input('filterUnit', sql.NVarChar, `%${filterUnit}%`);
+    }
+    if (filterTechnician) {
+      dataReq.input('filterTechnician', sql.NVarChar, `%${filterTechnician}%`);
+      countReq.input('filterTechnician', sql.NVarChar, `%${filterTechnician}%`);
+    }
+
+    dataReq.input('offset', sql.Int, offset);
+    dataReq.input('pageSize', sql.Int, pageSizeNum);
+
     const [result, countResult] = await Promise.all([
-      request.query(query),
-      request.query(countQuery)
+      dataReq.query(query),
+      countReq.query(countQuery)
     ]);
 
     const checklists = result.recordset || [];
-    const total = countResult.recordset[0]?.total || 0;
+    const total = countResult.recordset?.[0]?.total || 0;
 
-    // Map fields for frontend
     const formattedChecklists = checklists.map(item => ({
       id: item.refNum,
       submissionDate: item.sysdate,
@@ -596,7 +612,13 @@ app.get('/api/checklistshistory', async (req, res) => {
       refNum: item.refNum || '',
     }));
 
-    res.json({ total, checklists: formattedChecklists });
+    res.json({
+      total,
+      page: pageNum,
+      pageSize: pageSizeNum,
+      totalPages: Math.ceil(total / pageSizeNum),
+      checklists: formattedChecklists
+    });
   } catch (err) {
     console.error('Error fetching checklists:', err);
     res.status(500).json({ success: false, error: err.message });
