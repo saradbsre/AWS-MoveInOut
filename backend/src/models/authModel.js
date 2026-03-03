@@ -23,7 +23,7 @@ class AuthModel {
     }
 
     static async findActiveSession(Username, companyConfig) {
-        const db = await connectFinance(companyConfig);  // Sessions are in Finance DB
+        const db = await connectMaster(companyConfig);  // Sessions are in Master DB
         const result = await db.request()
             .input('username', sql.NVarChar, Username)
             .query(`
