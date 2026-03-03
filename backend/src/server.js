@@ -109,7 +109,7 @@ async function GetNextTransactionNo(moduleName, companyConfig) {
   request.input('moduleName', sql.NVarChar, moduleName);
 
   const result = await request.query(`
-    MERGE testTrno AS target
+    MERGE WebTrno AS target
     USING (SELECT @moduleName AS moduleName) AS source
     ON target.moduleName = source.moduleName
     WHEN MATCHED THEN
@@ -128,7 +128,7 @@ async function GetNextSerialNo(moduleName, companyConfig) {
   request.input('moduleName', sql.NVarChar, moduleName);
 
   const result = await request.query(`
-    MERGE testSrno AS target
+    MERGE WebSrno AS target
     USING (SELECT @moduleName AS moduleName) AS source
     ON target.moduleName = source.moduleName
     WHEN MATCHED THEN 
@@ -209,7 +209,6 @@ app.get('/api/keep-alive', async (req, res) => {
       // IMPORTANT: Reset the cookie maxAge to refresh the TTL
       req.session.cookie.maxAge = 60 * 60 * 1000;
       
-      // Update the session TTL in MongoDB
       req.session.touch();
       
       req.session.save(err => {
@@ -272,7 +271,7 @@ app.post('/api/send-report', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Failed to decode PDF base64 data' });
   }
   try {
-    await connect();
+    // await connectEstate(req.session.companyConfig);
     // Get tenant email from contract and tenant master
     // const result = await sql.query`
     //   SELECT t.email
@@ -521,7 +520,6 @@ app.get('/api/checklistshistory', async (req, res) => {
     const db = await connectEstate(req.session.companyConfig);
     const {
       page = '1',
-      pageSize = '25',
       filterType,
       filterDate,
       filterBuilding,
@@ -621,6 +619,72 @@ app.get('/api/checklistshistory', async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching checklists:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/checklistshistory-all', async (req, res) => {
+  try {
+    const db = await connectEstate(req.session.companyConfig);
+    const {
+      filterType,
+      filterDate,
+      filterBuilding,
+      filterUnit,
+      filterTechnician,
+      filterContractNo,
+      orderBy = 'desc'
+    } = req.query;
+
+    let where = 'WHERE 1=1';
+    if (filterType === 'date' && filterDate) where += ` AND CAST(sysdate AS DATE) = @filterDate`;
+    if (filterBuilding) where += ` AND build_id LIKE @filterBuilding`;
+    if (filterUnit) where += ` AND unit_desc LIKE @filterUnit`;
+    if (filterTechnician) where += ` AND userid LIKE @filterTechnician`;
+    if (filterContractNo) where += ` AND contract_id LIKE @filterContractNo`;
+
+    const query = `
+      SELECT *
+      FROM (
+        SELECT *,
+          ROW_NUMBER() OVER (PARTITION BY refNum ORDER BY sysdate DESC) AS rn
+        FROM checklist
+        ${where}
+      ) t
+      WHERE t.rn = 1
+      ORDER BY sysdate ${orderBy === 'asc' ? 'ASC' : 'DESC'};
+    `;
+
+    const request = db.request();
+    if (filterType === 'date' && filterDate) request.input('filterDate', sql.Date, filterDate);
+    if (filterBuilding) request.input('filterBuilding', sql.NVarChar, `%${filterBuilding}%`);
+    if (filterUnit) request.input('filterUnit', sql.NVarChar, `%${filterUnit}%`);
+    if (filterTechnician) request.input('filterTechnician', sql.NVarChar, `%${filterTechnician}%`);
+    if (filterContractNo) request.input('filterContractNo', sql.NVarChar, `%${filterContractNo}%`);
+
+    const result = await request.query(query);
+    const checklists = result.recordset || [];
+
+    const formattedChecklists = checklists.map(item => ({
+      id: item.refNum,
+      submissionDate: item.sysdate,
+      visitType: item.visitType,
+      building: item.build_id,
+      unit: item.unit_desc,
+      tenant: item.CTenantName,
+      contractNo: item.contract_id,
+      technician: item.userid,
+      startDate: item.contract_sdate,
+      endDate: item.contract_edate,
+      refNum: item.refNum || '',
+    }));
+
+    res.json({
+      total: formattedChecklists.length,
+      checklists: formattedChecklists
+    });
+  } catch (err) {
+    console.error('Error fetching all checklist history:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
