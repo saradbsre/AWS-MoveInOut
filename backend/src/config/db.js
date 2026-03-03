@@ -83,13 +83,13 @@ async function connectUser(connString) {
 
 // Convenience functions
 async function connectFinance(companyConfig) {
-  if (!companyConfig?.VEconnstring) throw new Error('Missing VE connection string');
-  return connectUser(companyConfig.VEconnstring);
+  if (!companyConfig?.VEconnstringWeb) throw new Error('Missing VE connection string');
+  return connectUser(companyConfig.VEconnstringWeb);
 }
 
 async function connectEstate(companyConfig) {
-  if (!companyConfig?.ESTconnstring) throw new Error('Missing EST connection string');
-  return connectUser(companyConfig.ESTconnstring);
+  if (!companyConfig?.ESTconnstringWeb) throw new Error('Missing EST connection string');
+  return connectUser(companyConfig.ESTconnstringWeb);
 }
 
 // ----------------------
@@ -101,7 +101,7 @@ async function getCompanyConfigByDomain(domain) {
     .input('domain', sql.NVarChar, domain)
     .query(`
       SELECT TOP 1
-        id, companyName, Cocode, CompanyDb, VEconnstring, ESTconnstring, DBServer, domainLink3
+        id, companyName, Cocode, CompanyDb, VEconnstringWeb, ESTconnstringWeb, DBServer, domainLink3
       FROM dbo.IntegratedCompany
       WHERE domainLink3 = @domain
       ORDER BY Cocode DESC
