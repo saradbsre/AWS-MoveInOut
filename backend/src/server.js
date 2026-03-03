@@ -541,13 +541,15 @@ app.get('/api/checklistshistory', async (req, res) => {
     if (filterContractNo) where += ` AND contract_id LIKE @filterContractNo`;
 
     const query = `
-      SELECT *
+      SELECT t.sysdate, visitType, refNum, CTenantName, t.build_id, b.build_desc, unit_desc, contract_id, contract_sdate, contract_edate,
+      t.userid
       FROM (
         SELECT *,
           ROW_NUMBER() OVER (PARTITION BY refNum ORDER BY sysdate DESC) AS rn
         FROM checklist
         ${where}
       ) t
+      INNER JOIN building b on t.build_id = b.build_id
       WHERE t.rn = 1
       ORDER BY sysdate ${orderBy === 'asc' ? 'ASC' : 'DESC'}
       OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
@@ -601,6 +603,7 @@ app.get('/api/checklistshistory', async (req, res) => {
       submissionDate: item.sysdate,
       visitType: item.visitType,
       building: item.build_id,
+      buildingDesc: item.build_desc,
       unit: item.unit_desc,
       tenant: item.CTenantName,
       contractNo: item.contract_id,
