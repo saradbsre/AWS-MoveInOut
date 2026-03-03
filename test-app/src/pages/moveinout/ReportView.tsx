@@ -292,8 +292,6 @@ useEffect(() => {
     setShowEstimationCost(true);
   };
 
-
-
   if (showEstimationCost) {
   return (
     <EstimationCost
