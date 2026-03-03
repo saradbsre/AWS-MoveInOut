@@ -41,7 +41,7 @@ const app = express();
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? ['https://portal.abdulwahedbinshabibproperty.com', 'https://portal.bsre.abdulwahedbinshabibproperty.com', 
-      'https://portal.hamda.abdulwahedbinshabibproperty.com']
+      'https://portal.hamda.abdulwahedbinshabibproperty.com', 'https://aws-moveinout.onrender.com']
     : true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

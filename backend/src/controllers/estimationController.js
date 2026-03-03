@@ -27,7 +27,7 @@ exports.SaveEstimationCost = async (req, res) => {
   try{
     const { equipment, srno } = req.body;
     const equipmentArray = Array.isArray(equipment) ? equipment : JSON.parse(equipment);
-    
+    console.log('Equipment: ', equipmentArray)
     if (!srno && !Array.isArray(equipmentArray)) {
       return res.json({ success: false, error: 'Missing srno or equipment data' });
     }
