@@ -698,7 +698,7 @@ app.get('/api/checklistDetails', async (req, res) => {
     c.itemno,	c.itemname,	c.brdcode, c.subcode, c.unit, c.qty, c.status,	c.remarks, c.userid, c.sysdate
     FROM checklist c 
     INNER JOIN building b on c.build_id = b.build_id
-    INNER JOIN tenant t on c.CTenantName = t.CTenantName
+    INNER JOIN tenant t on c.both = t.both
     WHERE c.refNum = @refNum ORDER BY c.sysdate DESC`;
     const request = db.request();
     request.input('refNum', sql.NVarChar, refNum);
