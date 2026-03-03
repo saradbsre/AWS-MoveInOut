@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import EstimationAuthButtons from '@/components/estimationcostcomponents/EstimationAuthButtons';
+import PageLoader from '@/components/PageLoader';
 import TransactionLoader from '@/components/TransactionLoader';
 import EstimationSearchDropdown from '@/components/estimationcostcomponents/EstimationSearchDropdown';
 import * as estimationService from '@/services/Transaction/Estimation/Estimationapi';
@@ -56,6 +57,7 @@ export default function EstimationCost({
     const data = EstimationCostData || {};
     const [header, setHeader] = useState(data.header || defaultHeader);
     const [equipment, setEquipment] = useState(data.equipment || defaultEquipment);
+    const [loading, setLoading] = useState(false);
     const [loadingEstimation, setLoadingEstimation] = useState(false);
 
     const [loadedSrno, setLoadedSrno] = useState(null);
@@ -64,7 +66,7 @@ export default function EstimationCost({
     const [checkedRows, setCheckedRows] = useState([]);
     const [currentAuthLevel, setCurrentAuthLevel] = useState(data?.authLevel || 1);
     const [currentAuthStatus, setCurrentAuthStatus] = useState(data?.authStatus || '');
-    const [loading, setLoading] = useState(false);
+    const [loadingSavingEstimationCost, setLoadingSavingEstimationCost] = useState(false);
     const [signatureNames, setSignatureNames] = useState({
         preparedName: '',
         verifiedName: '',
@@ -83,7 +85,9 @@ export default function EstimationCost({
 
     // Populate header and equipment when EstimationCostData is provided/changes
     useEffect(() => {
-        if (!EstimationCostData) return;
+        if (!EstimationCostData) {
+        return;
+        }   
 
         // Set auth level and status
         if (data.authLevel !== undefined) {
@@ -283,7 +287,7 @@ export default function EstimationCost({
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        setLoading(true);
+        setLoadingSavingEstimationCost(true);
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/save-estimation-cost`, {
                 method: 'POST',
@@ -301,7 +305,7 @@ export default function EstimationCost({
             if (result.success) {
                 // If this was a new estimation (zero cost), redirect back to estimation report
                 if (isNewEstimation) {
-                    setLoading(false);
+                    setLoadingSavingEstimationCost(false);
                     if (onNewChecklist) {
                         onNewChecklist();
                     }
@@ -326,16 +330,16 @@ export default function EstimationCost({
                         setCurrentAuthLevel(updatedData.header.authLevel);
                         setCurrentAuthStatus(updatedData.header.authStatus);
                     }
-                    setLoading(false);
+                    setLoadingSavingEstimationCost(false);
                 }
             } else {
                 alert('Error: ' + result.error);
-                setLoading(false);
+                setLoadingSavingEstimationCost(false);
             }
         } catch (error) {
             console.error('Error saving estimation cost:', error);
             alert('Failed to save estimation cost');
-            setLoading(false);
+            setLoadingSavingEstimationCost(false);
         }
     };
 
@@ -391,7 +395,9 @@ export default function EstimationCost({
 
     return (
         <>
-        {loading && <TransactionLoader message="Saving estimation cost..." progressText="Please wait while we process your data" />}
+
+        {loading && <PageLoader />}
+        {loadingSavingEstimationCost && <TransactionLoader message="Saving estimation cost..." progressText="Please wait while we process your data" />}
         {loadingEstimation && <TransactionLoader message="Loading estimation..." progressText="Please wait" />}
         <div className="max-w-full w-full mx-auto p-8 bg-white rounded shadow">
             {/* Add search dropdown only when not coming from history/checklist */}
@@ -412,8 +418,8 @@ export default function EstimationCost({
                 onAuthAction={handleAuthAction}
                 onBack={fromHistory ? onNewChecklist : undefined}
                 showBack={fromHistory}
-                loading={loading}
-                setLoading={setLoading}
+                loading={loadingSavingEstimationCost}
+                setLoading={setLoadingSavingEstimationCost}
                 hasValidData={!!(header.reference && header.reference !== '')}
                 equipment={equipment}
                 />

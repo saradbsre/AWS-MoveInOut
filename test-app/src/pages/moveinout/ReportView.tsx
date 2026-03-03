@@ -34,8 +34,8 @@ export interface ReportData {
   equipment: EquipmentItem[];
   // images: number;
   // videos: number;
-  images: (string | File | Blob | { url?: string; file_id?: string })[];
-  videos: (string | File | Blob | { url?: string; file_id?: string })[];
+  images: (number | string | File | Blob | { url?: string; file_id?: string })[];
+  videos: (number | string | File | Blob | { url?: string; file_id?: string })[];
   Reference: string;
 }
 
@@ -112,8 +112,18 @@ export default function ReportView({ Reference, onNewChecklist, fromHistory }: R
     return canvas.toDataURL('image/png');
   }
 
-  function getChecklistImageSrcList(images: number[] | string[]): string[] {
-    return images.map(id => `${apiUrl}/api/checklist-image/${id}`);
+  function getChecklistImageSrcList(images: ReportData['images']): string[] {
+    return images
+      .map((img) => {
+        if (typeof img === 'number' || typeof img === 'string') {
+          return `${apiUrl}/api/checklist-image/${img}`;
+        }
+        if (img && typeof img === 'object' && 'url' in img && img.url) {
+          return img.url;
+        }
+        return '';
+      })
+      .filter(Boolean);
   }
 
   useEffect(() => {

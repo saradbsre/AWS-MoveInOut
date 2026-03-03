@@ -41,7 +41,7 @@ const Auth = ({ children }: AuthProps) => {
 
   // Show loading while checking session
   if (isAuthenticated === null) {
-  return <PageLoader />;
+  return;
   }
 
   if (!isAuthenticated) {

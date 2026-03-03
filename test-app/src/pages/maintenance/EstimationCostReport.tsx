@@ -94,7 +94,7 @@ export default function EstimationReport() {
       const data = await response.json();
       
       setChecklists(
-        data.checklists.map((item: STRING) => ({
+        data.checklists.map((item: any) => ({
           ...item,
           id: item.id || item._id?.toString(),
           equipment: typeof item.equipment === 'string' ? JSON.parse(item.equipment) : item.equipment || [],

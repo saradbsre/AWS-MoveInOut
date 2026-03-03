@@ -177,14 +177,14 @@ export default function Moveinout(){
         setShowValidationPopup(true);
         return;
       }
-    setLoading(true); // <-- Start loading
+    setLoading(true);
     try {    
     // Save technician signature and submit form
     const technicianSignatureDataURL = technicianSigRef.current
       ? technicianSigRef.current.toDataURL()
       : '';
     
-    // ✅ Prepare report data
+    // Prepare report data
     const baseSubmissionData: ReportData = {
       building: selectedBuilding,
       unit: selectedUnit || 'N/A',
@@ -210,9 +210,9 @@ export default function Moveinout(){
     const barcodeValue = `${submissionData.visitType}-${submissionData.contractNo}-${formatDateShort(submissionData.submissionDate)}`;
     const barcodeBase64 = generateBarcodeBase64(barcodeValue);
     const checklistPayload = {
-      contract: submissionData.contractNo, // or submissionData.contract, match your backend
+      contract: submissionData.contractNo, // or submissionData.contract
       visitType: submissionData.visitType,
-      equipment: JSON.stringify(selectedEquipment),  // if equipment is an array/object, stringify it
+      equipment: JSON.stringify(selectedEquipment),  // if equipment is an array/object
       barcode: barcodeValue,
       tenantsignature: submissionData.tenantSignature,
       techniciansignature: submissionData.technicianSignature,
@@ -221,20 +221,18 @@ export default function Moveinout(){
       tenantName: submissionData.tenant,
       building: submissionData.building,
       unit: submissionData.unit,
-      date: submissionData.submissionDate, // or format as needed
+      date: submissionData.submissionDate,
       startDate: submissionData.startDate,
       endDate: submissionData.endDate,
-      refNum: submissionData.Reference // <-- Add this line
+      refNum: submissionData.Reference
     };
 
     setBarcodeValue(barcodeValue);
     setBarcodeBase64(barcodeBase64);
     
-    // ✅ Set report data and switch to report view
+    // Set report data
     setReportData(submissionData);
-    setCurrentView('report');
     
-    // Add your API submission logic here if needed
     // console.log('Form submitted successfully!', submissionData);
     await ContractAPI.saveChecklist({
       ...checklistPayload,
@@ -248,7 +246,7 @@ export default function Moveinout(){
     setValidationErrors(['Failed to save checklist.']);
     setShowValidationPopup(true);
   } finally {
-    setLoading(false); // <-- Stop loading
+    setLoading(false);
   }
   };
 
@@ -582,9 +580,9 @@ const renderSignatureView = (signatureType: 'tenant' | 'technician') => {
           type="button"
           onClick={() => {
             if (signatureType === 'technician') {
-              handleSubmit(); // ✅ Use handleSubmit for technician signature
+              handleSubmit(); // Use handleSubmit for technician signature
             } else {
-              handleNext(); // ✅ Use handleNext for tenant signature (with validation)
+              handleNext(); // Use handleNext for tenant signature (with validation)
             }
           }}
           className="flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-green-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-green-700 dark:border-gray-600 transition-colors"
