@@ -52,8 +52,7 @@ exports.login = async (req, res) => {
     const trimmedPassword = password ? password.trim() : '';
     // console.log(`Looking for user with username: "${trimmedUsername}"`);
     // Check for existing active session
-    const activeSession = await AuthModel.findActiveSession(trimmedUsername, req.session.companyConfig);
-
+    const activeSession = await AuthModel.findActiveSession(username, req.session.companyConfig);
     if (activeSession) {
       return res.json({
         success: false,
@@ -62,7 +61,7 @@ exports.login = async (req, res) => {
     }
 
     // Find user
-    const user = await AuthModel.FindUserByUsername(trimmedUsername, req.session.companyConfig);
+    const user = await AuthModel.FindUserByUsername(username, req.session.companyConfig);
     let tenantName = '';
     let tenantContracts = [];
     if (user.roleid === 'TENANT') {
