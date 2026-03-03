@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ChecklistHistory from './checklist/ChecklistHistory';
 import TechnicianDashboard from './moveinout/technician/TechnicianDashboard';
-import TenantDashboard from './tenant/TenantDashboard';
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -32,7 +31,6 @@ export default function Dashboard() {
       >
         {userRole === 'System Administrator' && <ChecklistHistory />}
         {userRole === 'TECHNICIAN' && <TechnicianDashboard />}
-        {userRole === 'TENANT' && <TenantDashboard />}
       </div>
     </div>
   );
