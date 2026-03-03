@@ -9,7 +9,7 @@ interface LoginCredentials {
 export const ValidateSession = async () => {
   try {
     const response = await axios.get(`${apiUrl}/api/auth/validateSession`, {
-      withCredentials: true,
+      withCredentials: true,  
     });
     return response.data;
   } catch {

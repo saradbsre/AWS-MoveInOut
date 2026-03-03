@@ -43,7 +43,8 @@ export default function LoginForm() {
     }
 
     try {
-      const domain = 'portal.bsre.abdulwahedbinshabibproperty.com';
+      // const domain = 'portal.bsre.abdulwahedbinshabibproperty.com';
+      const domain = window.location.hostname;
       await axios.post(`${apiUrl}/api/auth/initializeCompany`, { domain }, { withCredentials: true });
       const res = await login({ username, password });
         // console.log('Login response headers:', res.headers);
