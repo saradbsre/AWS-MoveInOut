@@ -748,7 +748,7 @@ const renderFormView = () => {
         selectedBuilding={selectedBuilding}
         selectedUnit={selectedUnit}
         selectedItems={selectedEquipment}
-        // onEquipmentChange={setSelectedEquipment}
+        onEquipmentChange={setSelectedEquipment}
         unitMasterDesc={tenantDetails?.unit_master_desc || ""}
         filterResetKey={filterResetKey}
       />

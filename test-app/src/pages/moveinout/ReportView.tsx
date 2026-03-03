@@ -224,13 +224,15 @@ useEffect(() => {
   };
 
   const handleSendEmail = async () => {
+    const data = reportData;
+    if (!data) return;
     try {
       setIsSending(true);
       const { images, videos, ...reportDataWithoutImages } = reportData;
       const payload = {
         reportData: {
           ...reportDataWithoutImages,
-          equipment: reportData?.equipment || '', // Always use the latest equipment from backend
+          equipment: reportData?.equipment || [], // Always use the latest equipment from backend
         },
         username,
         barcodeBase64,
@@ -509,7 +511,7 @@ useEffect(() => {
         </div>
           {reportData && reportData.images && reportData.images.length > 0 && (
             (() => {
-              const srcList = getChecklistImageSrcList(reportData.images as (number | string)[]);
+              const srcList = getChecklistImageSrcList(reportData.images);
               return (
                 <div className="mb-4">
                   <span className="font-semibold">Uploaded Images:</span>
