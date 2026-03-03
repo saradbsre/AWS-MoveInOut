@@ -8,8 +8,6 @@ import ChecklistHistory from '@/pages/checklist/ChecklistHistory';
 import { DisableDevTools } from './hooks/DisableDevTools';
 import RequireAuth from '@/components/auth';
 import ProtectedModule from '@/components/ProtectedModule';
-import ComplaintForm from '@/pages/tenant/ComplaintForm';
-import TenantStatus from '@/pages/tenant/TenantStatus';
 import TenantStatusReport from '@/pages/moveinout/technician/TenantReport';
 import ChecklistReport from '@/pages/checklist/ChecklistReport';
 import EstimationCost from '@/pages/maintenance/EstimationCost';
@@ -58,7 +56,6 @@ function App() {
                 (() => {
                   const roleid = sessionStorage.getItem('role')
                   // console.log('App roleid:', roleid);
-                  if (roleid === 'TENANT') return <TenantStatus />;
                   if (roleid === 'TECHNICIAN') return <TenantStatusReport />;
                   if (roleid === 'System Administrator') return <ChecklistReport />;
                   return <NotFound />;
@@ -81,7 +78,6 @@ function App() {
         {/* Un Protected Routes */}
         <Route path="UserCreation" element={<UserCreation />} />
         <Route path="ChecklistHistory" element={<ChecklistHistory />} />
-        <Route path="&Tenant Master Maintenance" element={<ComplaintForm />} />
         {/* <Route path="EstimationCost" element={<EstimationCost />} /> */}
         <Route path="EstimationCostReport" element={<EstimationReport />} />
         <Route path="EstimationCostReportView/:srno" element={<EstimationCostReportView />} />
