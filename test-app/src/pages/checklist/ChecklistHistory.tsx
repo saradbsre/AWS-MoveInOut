@@ -126,9 +126,9 @@ if (loading) {
 }
 
   return (
-    <div className="grid xl:grid-cols-3 xl:grid-rows-2 md:grid-cols-2 md:grid-rows-3 grid-cols-1 gap-6 p-6  dark:bg-gray-800">
+    <div className="grid xl:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6 p-6 dark:bg-gray-800">
       {/* 1st row: Report Table (left), Graph (right) */}
-      <div className="bg-white rounded shadow  border border-gray-200 p-4 flex flex-col  justify-center xl:col-span-1 xl:row-span-1 md:col-span-1 md:row-span-1 col-span-1  dark:bg-gray-800">
+      <div className="bg-white rounded shadow border border-gray-200 p-4 flex flex-col justify-center xl:col-span-1 md:col-span-1 col-span-1 dark:bg-gray-800">
         <h2 className="text-lg font-bold mb-15">Move In / Move Out Graph</h2>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
@@ -151,7 +151,7 @@ if (loading) {
         </ResponsiveContainer>
       </div>
       {/* 2nd row: Assigned Works Table (left), Tools & Materials (right) */}
-      <div className="bg-white rounded shadow border border-gray-200 p-4 flex flex-col justify-center xl:col-span-1 xl:row-span-1 md:col-span-1 md:row-span-1 col-span-1  dark:bg-gray-800">
+      <div className="bg-white rounded shadow border border-gray-200 p-4 flex flex-col justify-center xl:col-span-2 md:col-span-1 col-span-1 dark:bg-gray-800">
   <h2 className="text-lg font-bold mb-8 text-center">Reports by Technician</h2>
   <ResponsiveContainer width="100%" height={250}>
     <BarChart data={technicianBarData}>
@@ -167,7 +167,7 @@ if (loading) {
     Total Reports: {checklists.length}
   </div>
       </div>
-        <div className="bg-white rounded shadow  border border-gray-200 p-4 xl:col-span-2 xl:row-span-1 md:col-span-2 md:row-span-1 col-span-1 flex flex-col  dark:bg-gray-800">
+        <div className="bg-white rounded shadow border border-gray-200 p-4 flex flex-col xl:col-span-3 md:col-span-2 col-span-1 dark:bg-gray-800">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">Daily Move In / Move Out</h2>
           <select
