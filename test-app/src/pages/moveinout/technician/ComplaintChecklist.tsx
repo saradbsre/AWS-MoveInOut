@@ -258,6 +258,7 @@ useEffect(() => {
 
     const baseSubmissionData: ReportData = {
       building: selectedBuilding,
+      building_desc: buildingsearchTerm,
       unit: selectedUnit || null,
       tenantCode: tenantInfo?.tenantCode || 'N/A',
       tenant: tenantInfo?.tenantName || 'N/A',

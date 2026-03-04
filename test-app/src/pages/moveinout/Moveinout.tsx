@@ -187,6 +187,7 @@ export default function Moveinout(){
     // Prepare report data
     const baseSubmissionData: ReportData = {
       building: selectedBuilding,
+      building_desc: buildingsearchTerm,
       unit: selectedUnit || 'N/A',
       tenantCode: tenantInfo?.tenantCode || 'N/A',
       tenant: tenantInfo?.tenantName || 'N/A',
