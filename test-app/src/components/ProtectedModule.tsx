@@ -24,12 +24,17 @@ export default function ProtectedModule({ modulePath, children }: ProtectedModul
   const storedModules = sessionStorage.getItem('userModules');
   const userModules: UserModule[] = storedModules ? JSON.parse(storedModules) : [];
 
-  // Check if user has access to this module
-  const hasAccess = userModules.some((module: UserModule) => 
-    module.path === modulePath || 
-    module.path === `/${modulePath}` ||
-    `/${module.path}` === modulePath
-  );
+  // Check if user has access to this module (path match and permissions.access is YES/true)
+  const hasAccess = userModules.some((module: any) => {
+    const pathMatch =
+      module.path === modulePath ||
+      module.path === `/${modulePath}` ||
+      `/${module.path}` === modulePath;
+    const accessPerm =
+      module.permissions &&
+      (module.permissions.access === true || module.permissions.access === 'YES');
+    return pathMatch && accessPerm;
+  });
 
   if (!hasAccess) {
     // Get user's default module from sessionStorage or use first available module

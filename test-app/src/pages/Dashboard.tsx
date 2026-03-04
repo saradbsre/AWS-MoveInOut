@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ChecklistHistory from './checklist/ChecklistHistory';
 import TechnicianDashboard from './moveinout/technician/TechnicianDashboard';
-
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
@@ -11,8 +10,9 @@ export default function Dashboard() {
     }, 300);
     return () => clearTimeout(timer);
   }, []);
-
-  const userRole = sessionStorage.getItem('role') || '';
+ 
+  const rawRole = sessionStorage.getItem('role') || '' ;
+  const userRole = getRoleGroup(rawRole) || '';
   // console.log('Dashboard userRole:', userRole);
 
   return (

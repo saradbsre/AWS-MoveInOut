@@ -6,6 +6,7 @@ interface ImageModalProps {
   images: File[];
   onImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
+  existingImages?: { url: string }[];
 }
 
 export default function ImageModal({ 
@@ -13,7 +14,8 @@ export default function ImageModal({
   onClose, 
   images, 
   onImageSelect, 
-  onRemoveImage 
+  onRemoveImage,
+  existingImages  
 }: ImageModalProps) {
   if (!isOpen) return null;
 
@@ -53,25 +55,39 @@ export default function ImageModal({
           </div>
 
           {/* Image Preview Grid */}
-          {images.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {images.map((image, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={URL.createObjectURL(image)}
-                    alt={`Preview ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                  />
-                  <button
-                    onClick={() => onRemoveImage(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+       
+{(existingImages?.length || 0) + images.length > 0 && (
+  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+    {/* Existing images (from server/complaint) */}
+    {existingImages?.map((img, index) => (
+      <div key={`existing-${index}`} className="relative">
+        <img
+          src={img.url}
+          alt={`Existing ${index + 1}`}
+          className="w-full h-24 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+        />
+        {/* Optionally, add a remove button for existing images if you want */}
+      </div>
+    ))}
+    {/* Newly selected images */}
+    {images.map((image, index) => (
+      <div key={`new-${index}`} className="relative">
+        <img
+          src={URL.createObjectURL(image)}
+          alt={`Preview ${index + 1}`}
+          className="w-full h-24 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+        />
+        <button
+          onClick={() => onRemoveImage(index)}
+          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+        >
+          ×
+        </button>
+      </div>
+    ))}
+  </div>
+)}
+
 
           {/* Add More Button */}
           {images.length > 0 && images.length < 10 && (

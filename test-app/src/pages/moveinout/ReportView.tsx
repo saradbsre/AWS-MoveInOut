@@ -2,12 +2,12 @@ import React, { useRef, useState, useEffect } from 'react';
 import Barcode from 'react-barcode';
 import JsBarcode from 'jsbarcode';
 import { formatDateShort, formatDateTimeLong, getCurrentDateBarcode } from '@/utils/DateFormat';
-// import { SelectedItem } from '@/components/moveinoutcomponents/EquipmentSection';
+import { SelectedItem } from '@/components/moveinoutcomponents/EquipmentSection';
 import ReportHeader from '@/assets/bsreheader.png'
 import EstimationCost from '@/pages/maintenance/EstimationCost';
-import PageLoader from '@/components/PageLoader';
-import '@/styles/Moveinout.css'
-import axios from 'axios'
+import ReportViewPrint from './ReportViewPrint';
+//import '@/styles/ReportView.css';
+
 
 interface EquipmentItem {
   id: string;
@@ -15,14 +15,13 @@ interface EquipmentItem {
   itemname: string;
   unit: string;
   qty: number;
-  status: "good" | "not working"; // <-- restrict to these values
+  status: "good" | "not working";
   remarks: string;
 }
 export interface ReportData {
   technician: string;
   building: string;
   unit: string;
-  tenantCode: string;
   tenant: string;
   contractNo: string;
   startDate: string;
@@ -32,25 +31,41 @@ export interface ReportData {
   tenantSignature: string;
   technicianSignature: string;
   equipment: EquipmentItem[];
+<<<<<<< HEAD
   // images: number;
   // videos: number;
   images: (number | string | File | Blob | { url?: string; file_id?: string })[];
   videos: (number | string | File | Blob | { url?: string; file_id?: string })[];
   Reference: string;
+=======
+  images: (string | File | Blob | { url?: string; file_id?: any })[];
+  videos: (string | File | Blob | { url?: string; file_id?: any })[];
+  refNum: string;
+  unitNature: string;
+  unitType: string;
+  emirates: string;
+    build_desc: string;
+>>>>>>> 22d9f28 (complaint form)
 }
 
 interface ReportViewProps {
-  Reference: string;
+  //Reference: string;
+  reportData: ReportData;
+  selectedEquipment: SelectedItem[];
   onNewChecklist: () => void;
-  barcodeValue: string;
-  barcodeBase64: string;
+  // barcodeValue: string;
+  // barcodeBase64: string;
   fromHistory?: boolean;
 }
 
+function generateBarcodeBase64(value: string): string {
+  const canvas = document.createElement('canvas');
+  JsBarcode(canvas, value, { format: 'CODE128', width: 2, height: 40, displayValue: false });
+  return canvas.toDataURL('image/png');
+}
 
-
-export default function ReportView({ Reference, onNewChecklist, fromHistory }: ReportViewProps) {
-  // const barcodeBase64 = generateBarcodeBase64(barcodeValue);
+export default function ReportView({  reportData, selectedEquipment = [], onNewChecklist, fromHistory }: ReportViewProps) {
+  const barcodeValue = `${reportData.visitType}-${reportData.contractNo}-${getCurrentDateBarcode()}`;
   const username = sessionStorage.getItem('username') || 'User';
   const printRef = useRef<HTMLDivElement>(null);
   const [isSending, setIsSending] = useState(false);
@@ -61,10 +76,8 @@ export default function ReportView({ Reference, onNewChecklist, fromHistory }: R
   const [showEstimationCost, setShowEstimationCost] = useState(false);
   const [hasActiveEstimation, setHasActiveEstimation] = useState(false);
   const [checkingEstimation, setCheckingEstimation] = useState(true);
-  const [reportData, setReportData] = useState<ReportData | null>(null);
-  const barcodeValue = reportData ? `${reportData.visitType}-${reportData.contractNo}-${getCurrentDateBarcode()}` : '';
-  const apiUrl = import.meta.env.VITE_API_URL;
 
+<<<<<<< HEAD
   function createPageFooter(): void {
       // Remove any existing footer elements and styles
       const existingFooters = document.querySelectorAll('.dynamic-page-footer');
@@ -125,17 +138,22 @@ export default function ReportView({ Reference, onNewChecklist, fromHistory }: R
       })
       .filter(Boolean);
   }
+=======
+  useEffect(() => {
+    setBarcodeBase64(generateBarcodeBase64(barcodeValue));
+  }, [barcodeValue]);
+>>>>>>> 22d9f28 (complaint form)
 
   useEffect(() => {
     const checkExistingEstimation = async () => {
       try {
         setCheckingEstimation(true);
+        const apiUrl = import.meta.env.VITE_API_URL;
         const response = await fetch(
-          `${apiUrl}/api/check-estimation-exists/${encodeURIComponent(reportData?.Reference || '')}`,
+          `${apiUrl}/api/check-estimation-exists/${encodeURIComponent(reportData.refNum)}`,
           { credentials: 'include' }
         );
         const data = await response.json();
-        
         if (data.success) {
           setHasActiveEstimation(data.exists);
         }
@@ -145,10 +163,10 @@ export default function ReportView({ Reference, onNewChecklist, fromHistory }: R
         setCheckingEstimation(false);
       }
     };
-
-    if (reportData && reportData.Reference) {
+    if (reportData.refNum) {
       checkExistingEstimation();
     }
+<<<<<<< HEAD
   }, [reportData?.Reference, showEstimationCost]);
 
   useEffect(() => {
@@ -207,20 +225,65 @@ useEffect(() => {
   };
   fetchReportData();
 }, [Reference]);
+=======
+  }, [reportData.refNum, showEstimationCost]);
+>>>>>>> 22d9f28 (complaint form)
 
   const handlePrint = () => {
-    // Create dynamic footer
-    // injectPrintSignatureFooter();
-    createPageFooter();
-    // Small delay to ensure footer is rendered
-    setTimeout(() => {
-      window.print();
-      // Clean up after printing
-      setTimeout(() => {
-        const footers = document.querySelectorAll('.dynamic-page-footer');
-        footers.forEach(footer => footer.remove());
-      }, 1000);
-    }, 100);
+    const printContents = printRef.current?.innerHTML;
+    if (!printContents) return;
+    let styles = '';
+    Array.from(document.querySelectorAll('style,link[rel="stylesheet"]')).forEach((node) => {
+      styles += node.outerHTML;
+    });
+    const printWindow = window.open('', '_blank', 'width=900,height=650');
+    if (!printWindow) return;
+    printWindow.document.open();
+    printWindow.document.write(`
+  <html>
+    <head>
+      <title>Checklist Report</title>
+      ${styles}
+      <style>
+        @page {
+          margin: 10mm 15mm 25mm 15mm;
+        }
+        @media print {
+          thead { display: table-header-group; }
+          @page {
+            @bottom-left {
+              content: "Printed By: ${username} | ${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}";
+              font-size: 10px;
+              font-family: 'Times New Roman', serif;
+              color: black;
+            }
+            @bottom-right {
+              content: "Page " counter(page) " of " counter(pages);
+              font-size: 10px;
+              font-family: 'Times New Roman', serif;
+              color: black;
+            }
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div>${printContents}</div>
+      <script>
+        window.onload = function() {
+          window.focus();
+          window.print();
+        }
+      </script>
+    </body>
+  </html>
+`);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      setTimeout(() => printWindow.close(), 500);
+    };
   };
 
   const handleSendEmail = async () => {
@@ -228,13 +291,20 @@ useEffect(() => {
     if (!data) return;
     try {
       setIsSending(true);
+      const apiUrl = import.meta.env.VITE_API_URL;
       const { images, videos, ...reportDataWithoutImages } = reportData;
       const payload = {
+<<<<<<< HEAD
         reportData: {
           ...reportDataWithoutImages,
           equipment: reportData?.equipment || [], // Always use the latest equipment from backend
         },
         username,
+=======
+        reportData: reportDataWithoutImages,
+        selectedEquipment,
+        username: fromHistory ? reportData.technician : username,
+>>>>>>> 22d9f28 (complaint form)
         barcodeBase64,
       };
       const res = await fetch(`${apiUrl}/api/generate-checklist-pdf`, {
@@ -247,39 +317,34 @@ useEffect(() => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const result = reader.result as string;
-          // Remove the data:application/pdf;base64, prefix
           const base64Data = result.startsWith('data:') ? result.split(',')[1] : result;
           resolve(base64Data);
         };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
-
       await fetch(`${import.meta.env.VITE_API_URL}/api/send-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           pdfBase64: base64,
-          contractId: reportData?.contractNo || '',
-          tenantName: reportData?.tenant,
-          unitNumber: reportData?.unit,
-          buildingName: reportData?.building,
-          visitType: reportData?.visitType,
+          contractId: reportData.contractNo,
+          tenantName: reportData.tenant,
+          unitNumber: reportData.unit,
+          buildingName: reportData.building,
+          visitType: reportData.visitType,
           coordinatorName: username,
-
           companyName: 'ABDULWAHED AHMAD RASHED BIN SHABIB',
           contactNumber: '+971 55-580-9722',
           emailAddress: 'handover.bsre@gmail.com',
-          subject: `${reportData?.visitType} Checklist Report for Your Unit – ${reportData?.building} / ${reportData?.unit}`,
+          subject: `${reportData.visitType} Checklist Report for Your Unit – ${reportData.building} / ${reportData.unit}`,
         }),
       });
-      // Show success modal instead of alert
       setModalMessage("Email sent successfully!");
       setModalType("success");
       setShowModal(true);
     } catch (error) {
       console.error('Error sending email:', error);
-      // Show error modal instead of alert
       setModalMessage("Failed to send email. Please try again.");
       setModalType("error");
       setShowModal(true);
@@ -288,35 +353,54 @@ useEffect(() => {
     }
   };
 
+  function getImageSrcList(images: any[]): string[] {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    return images.map(img => {
+      if (img && typeof img === 'object' && 'file_id' in img) {
+        const fileId = typeof img.file_id === 'string'
+          ? img.file_id
+          : (img.file_id && typeof img.file_id === 'object' && '$oid' in img.file_id)
+            ? img.file_id.$oid
+            : '';
+        return `${apiUrl}/api/complaint-image/${fileId}`;
+      } else if (typeof img === 'string') {
+        if (img.startsWith('/api/complaint-image/')) {
+          return `${apiUrl}${img}`;
+        }
+        return img;
+      } else if (img instanceof Blob) {
+        return URL.createObjectURL(img);
+      } else if (img && typeof img === 'object' && 'url' in img) {
+        return img.url;
+      }
+      return '';
+    }).filter(Boolean);
+  }
+
   const handleGenerateEstimationCost = () => {
     setShowEstimationCost(true);
   };
 
   if (showEstimationCost) {
-  return (
-    <EstimationCost
-      EstimationCostData={{
-        technician: reportData ? reportData.technician : '',
-        building: reportData ? reportData.building : '',
-        unit: reportData ? reportData.unit : '',
-        tenantCode: reportData ? reportData.tenantCode : '',
-        tenant: reportData ? reportData.tenant : '',
-        contractNo: reportData ? reportData.contractNo : '',
-        startDate: reportData ? reportData.startDate : '',
-        endDate: reportData ? reportData.endDate : '',
-        visitType: reportData ? reportData.visitType : '',
-        equipment: reportData ? reportData.equipment : [], // Pass the checklist equipment
-        Reference: reportData ? reportData.Reference : '',
-        submissionDate: reportData ? reportData.submissionDate : ''
-      }}
-      onNewChecklist={() => setShowEstimationCost(false)}
-      fromHistory={true}
-    />
-  );
-}
-
-  if (!reportData) {
-    return <PageLoader />;
+    return (
+      <EstimationCost
+        EstimationCostData={{
+          technician: reportData.technician,
+          building: reportData.building,
+          unit: reportData.unit,
+          tenant: reportData.tenant,
+          contractNo: reportData.contractNo,
+          startDate: reportData.startDate,
+          endDate: reportData.endDate,
+          visitType: reportData.visitType,
+          equipment: selectedEquipment,
+          Reference: reportData.refNum,
+          submissionDate: reportData.submissionDate
+        }}
+        onNewChecklist={() => setShowEstimationCost(false)}
+        fromHistory={true}
+      />
+    );
   }
 
   return (
@@ -356,7 +440,19 @@ useEffect(() => {
           </div>
         </div>
       )}
-      <div id="pdf-report" ref={printRef} className="print-container p-4 max-w-4xl mx-auto space-y-6 bg-white">
+      {/* Hidden print area */}
+      <div style={{ display: 'none' }}>
+        <div ref={printRef}>
+          <ReportViewPrint
+            reportData={reportData}
+            selectedEquipment={selectedEquipment}
+            fromHistory={fromHistory}
+            username={username}
+          />
+        </div>
+      </div>
+      {/* On-screen content (unchanged) */}
+      <div className="print-content print-container p-4 max-w-4xl mx-auto space-y-6 bg-white">
         <div className="content-wrapper">
           {/* Company Header */}
           <div className="w-full mb-6">
@@ -368,36 +464,51 @@ useEffect(() => {
           </div>
           {/* Header */}
           <div className="flex items-center justify-between my-4 relative">
-            {/* Left spacer */}
             <div className="flex-1" />
-            {/* Centered title */}
             <div className="flex items-center justify-center my-4 relative">
               <h1 className="text-sm sm:text-base lg:text-lg font-bold text-black text-center">
                 Checklist Report
               </h1>
             </div>
-            {/* Barcode right */}
-            <div className="flex-1 flex items-center justify-end">
-              <div className="barcode-print-size flex items-center barcode-print-only">
-              {barcodeValue && (
+            <div className="flex-1 flex items-center justify-end"></div>
+          </div>
+          {/* Reference, Barcode, Date */}
+          <div
+            className="flex items-start justify-between w-full mb-2 text-base font-semibold"
+            style={{ fontSize: 14 }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+              }}
+            >
+              <span>
+                Reference No:{" "}
+                <span className="text-left">{reportData.refNum}</span>
+              </span>
+              <div className="barcode-print-size flex items-center barcode-print-only" style={{ marginTop: 2 }}>
                 <Barcode
                   value={barcodeValue}
                   width={1}
-                  height={40}
+                  height={25}
                   fontSize={12}
+                  displayValue={false}
                 />
-              )}
               </div>
             </div>
-          </div>
-          <div className="mb-2 text-base font-semibold">
-            <span className="font-mono">{reportData.Reference}</span>
+            <span style={{ alignSelf: "flex-start" }}>
+              Date:{" "}
+              <span className="text-right">
+                {formatDateTimeLong(reportData.submissionDate)}
+              </span>
+            </span>
           </div>
           {/* Report Table */}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse border border-black bg-white no-wrap-table">
               <tbody>
-                {/* Date Row */}
                 <tr>
                   <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
                     Tenant
@@ -406,22 +517,38 @@ useEffect(() => {
                     {reportData.tenant}
                   </td>
                 </tr>
-                {/* Building and Unit Row */}
                 <tr>
                   <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
                     Building
                   </td>
                   <td className="w-1/2 bg-white p-2 text-xs font-normal text-black border border-black" colSpan={5}>
-                    {reportData.building}
+                    {reportData.build_desc}
                   </td>
                 </tr>
-                {/* Visit Type Row */}
                 <tr>
                   <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
-                    Date
+                    Unit
                   </td>
                   <td className="w-1/4 bg-white p-2 text-xs font-normal text-black border border-black">
-                    {formatDateTimeLong(reportData.submissionDate)}
+                    {reportData.unit}
+                  </td>
+                  <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
+                    Unit Nature
+                  </td>
+                  <td className="w-1/4 bg-white p-2 text-xs font-normal text-black border border-black">
+                    {reportData.unitNature === "R"
+  ? "Residential"
+  : reportData.unitNature === "C"
+    ? "Commercial"
+    : reportData.unitNature || "-"}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
+                    Unit Type
+                  </td>
+                  <td className="w-1/4 bg-white p-2 text-xs font-normal text-black border border-black">
+                    {reportData.unitType}
                   </td>
                   <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
                     Visit Type
@@ -430,7 +557,6 @@ useEffect(() => {
                     {reportData.visitType}
                   </td>
                 </tr>
-                {/* Tenant and Contract No Row */}
                 <tr>
                   <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
                     Contract No
@@ -439,22 +565,21 @@ useEffect(() => {
                     {reportData.contractNo}
                   </td>
                   <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
-                    Unit
-                  </td>
-                  <td className="w-1/4 bg-white p-2 text-xs font-normal text-black border border-black">
-                    {reportData.unit}
-                  </td>
-                </tr>
-                {/* Start and End Date Row */}
-                <tr>
-                  <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
                     Start
                   </td>
                   <td className="w-1/4 bg-white p-2 text-xs font-normal text-black border border-black">
                     {formatDateShort(reportData.startDate)}
                   </td>
+                </tr>
+                <tr>
                   <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
-                    End
+                    Emirates
+                  </td>
+                  <td className="w-1/4 bg-white p-2 text-xs font-normal text-black border border-black">
+                    {reportData.emirates}
+                  </td>
+                  <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">
+                    End Date
                   </td>
                   <td className="w-1/4 bg-white p-2 text-xs font-normal text-black border border-black">
                     {formatDateShort(reportData.endDate)}
@@ -485,15 +610,15 @@ useEffect(() => {
                 </tr>
               </thead>
               <tbody>
-                {(reportData?.equipment?.length ?? 0) === 0 ? (
+                {selectedEquipment.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-3 py-2 border border-black text-center text-xs sm:text-sm text-black font-bold">
                       Condition All Good
                     </td>
                   </tr>
                 ) : (
-                  (reportData?.equipment ?? []).map((item, idx) => (
-                    <tr key={item.id || idx}>
+                  selectedEquipment.map((item, idx) => (
+                    <tr key={item.id}>
                       <td className="px-3 py-2 border border-black text-xs text-black w-[5%] text-center">{idx + 1}</td>
                       <td className="px-3 py-2 border border-black text-xs text-black w-[45%]">{item.itemname}</td>
                       <td className="px-3 py-2 border border-black text-xs text-black text-center w-[5%]">{item.unit}</td>
@@ -506,7 +631,11 @@ useEffect(() => {
               </tbody>
             </table>
           </div>
+          {/* <div className="print-blank-center print-only">
+            THIS SPACE INTENTIONALLY LEFT BLANK
+          </div> */}
         </div>
+<<<<<<< HEAD
           {reportData && reportData.images && reportData.images.length > 0 && (
             (() => {
               const srcList = getChecklistImageSrcList(reportData.images);
@@ -531,11 +660,38 @@ useEffect(() => {
         {/* Signatures at bottom of page */}
         <div className="signatures-bottom flex flex-col sm:flex-row justify-between items-start w-full">
           {/* Tenant Signature Box - Left */}
+=======
+        <div className="no-print">
+         {Array.isArray(reportData.images) && reportData.images.length > 0 && (
+  (() => {
+    const srcList = getImageSrcList(reportData.images ?? []);
+    return (
+      <div className="mb-4 ">
+        <span className="font-semibold">Uploaded Images:</span>
+        <div className="flex flex-wrap gap-4 mt-2">
+          {srcList.map((src, idx) => (
+            <img
+              key={idx}
+              src={src}
+              alt={`Uploaded ${idx + 1}`}
+              className="w-32 h-32 object-cover border rounded"
+              onLoad={() => src.startsWith('blob:') && URL.revokeObjectURL(src)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  })()
+)}
+        </div>
+        {/* Signatures at bottom of page (on-screen only) */}
+        <div className="signatures-bottom flex flex-col sm:flex-row justify-between items-start w-full mt-8">
+>>>>>>> 22d9f28 (complaint form)
           <div className="flex flex-col items-start">
             <span className="font-bold text-black text-xs mb-1">ACCEPTED BY:</span>
             <span className="font-bold text-black mb-2 text-xs">{reportData.tenant}</span>
             <div className="border-2 border-black rounded-lg bg-white flex items-center justify-center w-40 h-16 mb-2">
-              {reportData && reportData.tenantSignature ? (
+              {reportData.tenantSignature ? (
                 <img
                   src={reportData.tenantSignature}
                   alt="Tenant Signature"
@@ -547,12 +703,11 @@ useEffect(() => {
               )}
             </div>
           </div>
-          {/* Technician Signature Box - Right */}
           <div className="flex flex-col items-start">
             <span className="font-bold text-black text-xs mb-1">PREPARED BY:</span>
             <span className="font-bold text-black mb-2 text-xs">{fromHistory ? reportData.technician : (username || 'Technician')}</span>
             <div className="border-2 border-black rounded-lg bg-white flex items-center justify-center w-40 h-16 mb-2">
-              {reportData && reportData.technicianSignature ? (
+              {reportData.technicianSignature ? (
                 <img
                   src={reportData.technicianSignature}
                   alt="Technician Signature"
@@ -566,7 +721,6 @@ useEffect(() => {
           </div>
         </div>
       </div>
-      {/* </div>    */}
       {/* Action Buttons */}
       <div className="no-print flex flex-col sm:flex-row gap-4 justify-center pt-6">
         <button
@@ -574,7 +728,6 @@ useEffect(() => {
           onClick={handlePrint}
           className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-green-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-green-700 dark:border-gray-600 transition-colors"
         >
-          {/* ...print icon... */}
           Print Checklist
         </button>
         {fromHistory ? (
@@ -583,7 +736,6 @@ useEffect(() => {
             onClick={onNewChecklist}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-blue-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-blue-700 dark:border-gray-600 transition-colors"
           >
-            {/* ...back icon... */}
             Back to Checklist History
           </button>
         ) : (
@@ -592,7 +744,6 @@ useEffect(() => {
             onClick={onNewChecklist}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-green-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-green-700 dark:border-gray-600 transition-colors"
           >
-            {/* ...new checklist icon... */}
             New Checklist
           </button>
         )}
@@ -603,15 +754,11 @@ useEffect(() => {
           className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-green-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-green-700 dark:border-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSending ? (
-            <>
-
-              Sending...
-            </>
+            <>Sending...</>
           ) : (
             'Send By Email'
           )}
         </button>
-
         <button
           type="button"
           onClick={handleGenerateEstimationCost}

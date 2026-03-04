@@ -4,6 +4,7 @@ import { useDarkMode } from '@/hooks/useDarkMode';
 import axios from 'axios';
 import logo1 from '../assets/headerlogo.jpeg';
 import { ValidateSession } from '@/services/Authentication/Loginapi';
+import { getRoleGroup } from '@/utils/getRoleGroup';
 
 const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes
 // const ACTIVITY_CHECK_THRESHOLD = 10 * 60 * 1000; // 10 minutes
@@ -34,7 +35,8 @@ export default function Layout() {
   // Get modules from sessionStorage instead of hardcoded array
   const storedModules = sessionStorage.getItem('userModules');
   const modules: Module[] = storedModules ? JSON.parse(storedModules) : [];
-  const roleid = localStorage.getItem('role') || sessionStorage.getItem('role');
+  const rawRole = sessionStorage.getItem('role') || '' ;
+  const roleid = getRoleGroup(rawRole) || '';
 
 
 
@@ -50,18 +52,23 @@ export default function Layout() {
   // ];
 
    const allowedModuleNames =
-    roleid === 'TENANT'
+    roleid === 'branch'
       ? [
           "Dashboard",
-          "Tenant Status Report",
-          "&Tenant Master Maintenance"
+          "&Dashboard",
+          "Move &Out Register",
+          "&Complaint Register",
+          "Pending Complaints Register",
         ]
       : [
           "Dashboard",
           "Move &In Register",
           "Move in/Out Report",
           "Estimation Cost",
-          "Estimation Cost Report"
+          "Estimation Cost Report",
+          "Pending Complaints Register",
+          "Complaint Category"
+          
           // Add more as you create them in the cloud
         ];
 
@@ -292,8 +299,8 @@ const sendKeepAlive = useCallback(async () => {
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-md shadow-lg dark:bg-gray-700 dark:border-gray-600 z-50">
                      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-600 text-sm font-medium text-gray-900 dark:text-gray-200">
-      User: {sessionStorage.getItem('username') || 'User'}
-    </div>
+                    User: {sessionStorage.getItem('username') || 'User'}
+                  </div>
                     <ul className="py-1 text-sm text-gray-700 dark:text-gray-200">
                       <li>
                         <button
@@ -353,8 +360,12 @@ const sendKeepAlive = useCallback(async () => {
                   <span className="ms-3">
                      {name === "Move &In Register"
                    ? "Move In/Out"
-                   : name === "&Tenant Master Maintenance"
+                   : name === "&Complaint Register"
                    ? "Complaint Form"
+                   : name === "&Dashboard"
+                   ? "Dashboard"
+                   : name === "&Tenant Master Maintenance"
+                   ? "Complaint Report"
                    : name}
                   </span>
                   

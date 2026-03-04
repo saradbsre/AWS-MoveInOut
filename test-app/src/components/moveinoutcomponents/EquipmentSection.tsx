@@ -37,6 +37,7 @@ interface EquipmentSectionProps {
   selectedUnit: string;
   selectedItems?: SelectedItem[];
   onEquipmentChange?: (selectedItems: SelectedItem[]) => void;
+  isBranch?: boolean; // New prop to indicate if it's a branch complaint
 }
 
 interface FilterRow {
@@ -48,7 +49,8 @@ interface FilterRow {
 export default function EquipmentSection({ 
   selectedUnit,
   selectedItems = [],
-  onEquipmentChange 
+  onEquipmentChange,
+  isBranch = false
 }: EquipmentSectionProps) {
   const [equipmentData, setEquipmentData] = useState<Equipment[]>([]);
   const [availableFieldTypes, setAvailableFieldTypes] = useState<string[]>([]);
@@ -73,7 +75,7 @@ export default function EquipmentSection({
   // Fetch equipment data
   useEffect(() => {
     // Don't fetch if no unit is selected
-    if (!selectedUnit) {
+    if (!selectedUnit && !isBranch) {
       setEquipmentData([]);
       setAvailableFieldTypes([]);
       return;
@@ -106,7 +108,7 @@ export default function EquipmentSection({
     };
 
     fetchEquipmentData();
-  }, [selectedUnit]);
+  }, [selectedUnit, isBranch]);
 
   // Apply filters to equipment data
   const getFilteredEquipment = () => {
@@ -311,10 +313,10 @@ export default function EquipmentSection({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filter Type</label>
           <button
             type="button"
-            onClick={() => (selectedUnit && !loading) ? setIsTypeDropdownOpen(!isTypeDropdownOpen) : null}
-            disabled={!selectedUnit || loading} // Add loading condition
+            onClick={() => ((selectedUnit || isBranch) && !loading) ? setIsTypeDropdownOpen(!isTypeDropdownOpen) : null}
+            disabled={!selectedUnit && !isBranch || loading} // Add loading condition
             className={`w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 text-left flex justify-between items-center ${
-              (!selectedUnit || loading)
+              ((!selectedUnit && !isBranch) || loading)
                 ? 'bg-gray-100 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50' 
                 : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
             }`}
@@ -322,7 +324,7 @@ export default function EquipmentSection({
             <span>
               {loading
                 ? 'Loading filter types...'
-                : !selectedUnit 
+                : (!selectedUnit && !isBranch)
                   ? 'Select unit first...' 
                   : (currentFilterType || 'Select filter type...')
               }
@@ -368,15 +370,16 @@ export default function EquipmentSection({
             placeholder={
               loading
                 ? 'Loading...'
-                : !selectedUnit
+                : (!selectedUnit && !isBranch)
                   ? 'Select unit first...'
                   : currentFilterType 
                     ? 'Search filter details...' 
                     : 'Select filter type first...'
             }
-            disabled={!currentFilterType || !selectedUnit || loading} // Add loading condition
+            //disabled={!currentFilterType || !selectedUnit || loading} // Add loading condition
+            disabled={!currentFilterType || (!selectedUnit && !isBranch) || loading} // Add loading condition
             className={`w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 placeholder-gray-500 dark:placeholder-gray-400 ${
-              (!currentFilterType || !selectedUnit || loading)
+              (!currentFilterType || (!selectedUnit && !isBranch) || loading)
                 ? 'bg-gray-100 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50'
                 : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
             }`}
@@ -417,17 +420,18 @@ export default function EquipmentSection({
                 setItemSearchTerm(e.target.value);
                 setIsItemDropdownOpen(true);
               }}
-              disabled={!selectedUnit || loading} // Add loading condition
-              onFocus={() => selectedUnit && !loading ? setIsItemDropdownOpen(true) : null}
+             // disabled={!selectedUnit || loading} // Add loading condition
+              disabled={(!selectedUnit && !isBranch) || loading} // Add loading condition
+              onFocus={() => (selectedUnit || isBranch) && !loading ? setIsItemDropdownOpen(true) : null}
               placeholder={
                 loading 
                   ? 'Loading equipment...' 
-                  : !selectedUnit 
+                  : (!selectedUnit && !isBranch) 
                     ? 'Select unit first...' 
                     : 'Search equipment...'
               }
               className={`border border-gray-300 dark:border-gray-600 rounded-lg p-2 w-full placeholder-gray-500 dark:placeholder-gray-400 ${
-                (!selectedUnit || loading)
+                ((!selectedUnit && !isBranch) || loading)
                   ? 'bg-gray-100 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                   : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
               }`}
