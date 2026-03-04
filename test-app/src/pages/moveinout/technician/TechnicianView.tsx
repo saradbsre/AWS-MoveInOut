@@ -35,8 +35,8 @@ export interface ReportData {
   equipment: EquipmentItem[];
   // images: number;
   // videos: number;
-  images: (string | File | Blob | { url?: string; file_id?: string })[];
-  videos: (string | File | Blob | { url?: string; file_id?: string })[];
+  images: (number | string | File | Blob | { url?: string; file_id?: string })[];
+  videos: (number | string | File | Blob | { url?: string; file_id?: string })[];
   Reference: string;
   subComp_id?: string | number;
   unitNature?: string;

@@ -158,30 +158,6 @@ function getImageSrcList(images: any[]): string[] {
   }).filter(Boolean);
 }
 
-async function submitAllComplaints(data: ComplaintReportData) {
-  if (!data.equipment || !Array.isArray(data.equipment)) return;
-  for (const eq of data.equipment) {
-    await insertComplaint({
-      build_id: data.build_id,
-      unit_desc: data.unit_desc,
-      place_id: (data as any).place_id, // if not in type, use as any or extend type
-      area_id: (data as any).area_id,
-      contract_id: data.contractNo,
-      contract_sdate: data.startDate,
-      contract_edate: data.endDate,
-      refNum: referenceNumber,
-      status: data.status,
-      both: data.both,
-      CTenantName: data.tenant,
-      category: eq.category || '',
-      roomType: eq.roomType || '',
-      issued_item: eq.equipment || '',
-      remarks: eq.remarks || '',
-      reportedby: data.username,
-      userid: data.username,
-    });
-  }
-}
   return (
       <div id="pdf-report" ref={printRef} className="print-container p-4 max-w-4xl mx-auto space-y-6 bg-white">
         <div className="content-wrapper">
