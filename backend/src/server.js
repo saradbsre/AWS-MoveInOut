@@ -271,7 +271,7 @@ app.post('/api/send-report', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Failed to decode PDF base64 data' });
   }
   try {
-    await connect();
+    // await connectEstate(req.session.companyConfig);
     // Get tenant email from contract and tenant master
     // const result = await sql.query`
     //   SELECT t.email
@@ -319,110 +319,6 @@ app.post('/api/send-report', async (req, res) => {
           <p>Greetings from the Handover Team.</p>
           
           <p>Please find attached the ${req.body.visitType || 'Move-Out'} Checklist Report for your unit <strong>${req.body.unitNumber || '[Unit Number]'}</strong> / <strong>${req.body.buildingName || '[Property Name]'}</strong>, which was prepared during your handover process. The report outlines the condition of the items and equipment in the unit at the time of your ${req.body.visitType ? req.body.visitType.toLowerCase() : 'move-out'} inspection.</p>
-          
-          <p>We kindly request you to review the attached report. If you have any questions or concerns regarding any of the checklist items, please do not hesitate to contact us.</p>
-          
-          <p>Thank you for your cooperation throughout your tenancy, and we wish you all the best in your future endeavors.</p>
-          
-          <p>Warm regards,<br>
-          <strong>${req.body.coordinatorName || '[Your Name]'}</strong><br>
-          <strong>${req.body.companyName || 'ABDULWAHED AHMAD RASHED BIN SHABIB'}</strong><br>
-          <strong>${req.body.contactNumber || '[Contact Number]'}</strong><br>
-          <strong>${req.body.emailAddress || user}</strong></p>
-        </div>`,
-        attachments: [
-          {
-            filename: 'Checklist_Report.pdf',
-            content: pdfBuffer,
-            contentType: 'application/pdf'
-          }
-        ]
-      });
-      res.json({ success: true });
-      return;
-    } catch (e) {
-      console.error('Decryption or mail config error:', e);
-      return res.status(500).json({ success: false, error: 'Decryption or mail config error: ' + e.message });
-    }
-  } catch (err) {
-    console.error('Email send error:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-app.post('/api/send-complaintreport', async (req, res) => {
-  // Debug log for incoming request body
-  // console.log('POST /api/send-report body:', req.body);
-  const pdfBase64 = req.body.pdfBase64;
-  const contractId = req.body.contractId;
-  const subject = req.body.subject;
-  const text = req.body.text;
-
-  // console.log(contractId)
-  if (!pdfBase64 || typeof pdfBase64 !== 'string' || !pdfBase64.trim()) {
-    return res.status(400).json({ success: false, error: 'Missing or invalid PDF data', received: req.body });
-  }
-  if (!contractId) {
-    return res.status(400).json({ success: false, error: 'Missing contractId', received: req.body });
-  }
-  let pdfBuffer;
-  try {
-    pdfBuffer = Buffer.from(pdfBase64, 'base64');
-    if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer) || pdfBuffer.length === 0) {
-      throw new Error('Invalid PDF buffer');
-    }
-  } catch (e) {
-    return res.status(400).json({ success: false, error: 'Failed to decode PDF base64 data' });
-  }
-  try {
-    await connectMaster();
-    // Get tenant email from contract and tenant master
-    // const result = await sql.query`
-    //   SELECT t.email
-    //   FROM Contracts c
-    //   JOIN Tenants t ON c.tenant_id = t.id
-    //   WHERE c.id = ${contractId}
-    // `;
-    // if (!result.recordset.length || !result.recordset[0].email) {
-    //   return res.status(400).json({ success: false, error: 'Tenant email not found for contract' });
-    // }
-    // const tenantEmail = result.recordset[0].email;
-    // Store the encrypted password and key in env for security
-    const user = process.env.MAIL_USER;
-    const reciever = process.env.MAIL_USER_RECIEVER;
-    const ccreciever = process.env.MAIL_USER_CCRECIEVER;
-    const encryptedPass = process.env.MAIL_PASS_ENC;
-    const key = process.env.MAIL_KEY;
-    const tenantName = req.body.tenantName || '[Tenant Name]';
-    // console.log('MAIL_PASS_ENC:', encryptedPass, 'length:', encryptedPass ? encryptedPass.length : 0);
-    // console.log('MAIL_KEY:', key, 'length:', key ? key.length : 0);
-    try {
-      const keyBuffer = Buffer.from(key, 'hex');
-      // console.log('Buffer.from(key, "hex") length:', keyBuffer.length);
-      const password = decryptPassword(encryptedPass, key);
-      // continue as normal
-      const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // SSL
-        requireTLS: true,
-        auth: {
-          user: user,
-          pass: password
-        }
-      });
-      await transporter.sendMail({
-        from: user,
-        to: reciever,
-        cc: ccreciever,
-        subject: subject || `Complaint Report for Your Unit – ${req.body.buildingName || '[Building Name]'} / ${req.body.unitNumber || '[Unit No]'}`,
-        html: text ||
-          `<div style="font-family: 'Times New Roman', Times, serif; font-size: 14px; line-height: 1.6; color: #000;">
-          <p><strong>Dear Mr./Mrs.${tenantName},</strong></p>
-          
-          <p>Greetings from the Handover Team.</p>
-          
-          <p>Please find attached the Complaint Report for your unit <strong>${req.body.unitNumber || '[Unit Number]'}</strong> / <strong>${req.body.buildingName || '[Property Name]'}</strong>, which was prepared during your handover process. The report outlines the condition of the items and equipment in the unit at the time of your ${req.body.visitType ? req.body.visitType.toLowerCase() : 'move-out'} inspection.</p>
           
           <p>We kindly request you to review the attached report. If you have any questions or concerns regarding any of the checklist items, please do not hesitate to contact us.</p>
           
@@ -561,111 +457,29 @@ app.post('/api/send-complaintreport', async (req, res) => {
 //   }
 // });
 
-// app.get('/api/checklists-by-status', async (req, res) => {
-//   try {
-//     const db = await connectEstate(req.session.companyConfig); // Use your estate DB connection
-//     const { status = '0' } = req.query;
-
-//     let query = `
-//       SELECT 
-//         trno, srno, refNum, trdate, contract_id, t.both, t.CTenantName, b.build_id, b.build_desc, eh.unit_desc, visitType, contract_sdate, contract_edate,
-//         preparedBy, verifiedBy, approvedBy, eh.authLevel, authStatus, eh.remarks, grandTotal, totalAmt, vatAmt, eh.userid, eh.sysdate
-//       FROM estimationcost_header eh
-//       INNER JOIN building b on eh.build_id = b.build_id
-//       INNER JOIN tenant t on eh.both = t.both
-//     `;
-//     let params = [];
-
-//     if (status !== '0') {
-//       query += ' WHERE eh.authLevel = @authLevel';
-//       params.push({ name: 'authLevel', type: sql.Int, value: parseInt(status) });
-//     }
-//     query += ' ORDER BY trdate DESC';
-
-//     const request = db.request();
-//     params.forEach(p => request.input(p.name, p.type, p.value));
-
-//     const result = await request.query(query);
-
-//     const formattedChecklists = result.recordset.map(item => ({
-//       id: item.srno?.toString(),
-//       submissionDate: item.trdate || item.sysdate || '',
-//       visitType: item.visitType || '',
-//       building: item.build_desc || '',
-//       unit: item.unit_desc || '',
-//       tenant: item.CTenantName || '',
-//       contractNo: item.contract_id || '',
-//       technician: item.userid || '',
-//       startDate: item.contract_sdate || '',
-//       endDate: item.contract_edate || '',
-//       refNum: item.refNum || '',
-//       equipment: [], // You can fetch equipment details if needed
-//       authLevel: item.authLevel,
-//       Trno: item.trno,
-//       Srno: item.srno,
-//       preparedBy: item.preparedBy,
-//       verifiedBy: item.verifiedBy,
-//       approvedBy: item.approvedBy,
-//       remarks: item.remarks,
-//       grandTotal: item.grandTotal,
-//       totalAmt: item.totalAmt,
-//       vatAmt: item.vatAmt
-//     }));
-
-//     res.json({ total: formattedChecklists.length, checklists: formattedChecklists });
-//   } catch (err) {
-//     console.error('Error fetching checklists by status:', err);
-//     res.status(500).json({ success: false, error: err.message });
-//   }
-// });
-
 app.get('/api/checklists-by-status', async (req, res) => {
   try {
-    const db = await connectEstate(req.session.companyConfig);
+    const db = await connectEstate(req.session.companyConfig); // Use your estate DB connection
     const { status = '0' } = req.query;
 
     let query = `
       SELECT 
-        eh.trno,
-        eh.srno,
-        eh.refNum,
-        eh.trdate,
-        eh.contract_id,
-        eh.both,
-        ISNULL(t.CTenantName, '') AS CTenantName,
-        eh.build_id,
-        ISNULL(b.build_desc, '') AS build_desc,
-        eh.unit_desc,
-        eh.visitType,
-        eh.contract_sdate,
-        eh.contract_edate,
-        eh.preparedBy,
-        eh.verifiedBy,
-        eh.approvedBy,
-        eh.authLevel,
-        eh.authStatus,
-        eh.remarks,
-        eh.grandTotal,
-        eh.totalAmt,
-        eh.vatAmt,
-        eh.userid,
-        eh.sysdate
+        trno, srno, refNum, trdate, contract_id, t.both, t.CTenantName, b.build_id, b.build_desc, eh.unit_desc, visitType, contract_sdate, contract_edate,
+        preparedBy, verifiedBy, approvedBy, eh.authLevel, authStatus, eh.remarks, grandTotal, totalAmt, vatAmt, eh.userid, eh.sysdate
       FROM estimationcost_header eh
-      LEFT JOIN building b ON eh.build_id = b.build_id
-      LEFT JOIN tenant t ON eh.both = t.both
+      INNER JOIN building b on eh.build_id = b.build_id
+      INNER JOIN tenant t on eh.both = t.both
     `;
+    let params = [];
 
     if (status !== '0') {
       query += ' WHERE eh.authLevel = @authLevel';
+      params.push({ name: 'authLevel', type: sql.Int, value: parseInt(status) });
     }
-
-    query += ' ORDER BY eh.trdate DESC';
+    query += ' ORDER BY trdate DESC';
 
     const request = db.request();
-
-    if (status !== '0') {
-      request.input('authLevel', sql.Int, parseInt(status));
-    }
+    params.forEach(p => request.input(p.name, p.type, p.value));
 
     const result = await request.query(query);
 
@@ -681,7 +495,7 @@ app.get('/api/checklists-by-status', async (req, res) => {
       startDate: item.contract_sdate || '',
       endDate: item.contract_edate || '',
       refNum: item.refNum || '',
-      equipment: [],
+      equipment: [], // You can fetch equipment details if needed
       authLevel: item.authLevel,
       Trno: item.trno,
       Srno: item.srno,
@@ -694,17 +508,12 @@ app.get('/api/checklists-by-status', async (req, res) => {
       vatAmt: item.vatAmt
     }));
 
-    res.json({
-      total: formattedChecklists.length,
-      checklists: formattedChecklists
-    });
-
+    res.json({ total: formattedChecklists.length, checklists: formattedChecklists });
   } catch (err) {
     console.error('Error fetching checklists by status:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
 
 app.get('/api/checklistshistory', async (req, res) => {
   try {
@@ -732,13 +541,15 @@ app.get('/api/checklistshistory', async (req, res) => {
     if (filterContractNo) where += ` AND contract_id LIKE @filterContractNo`;
 
     const query = `
-      SELECT *
+      SELECT t.sysdate, visitType, refNum, CTenantName, t.build_id, b.build_desc, unit_desc, contract_id, contract_sdate, contract_edate,
+      t.userid
       FROM (
         SELECT *,
           ROW_NUMBER() OVER (PARTITION BY refNum ORDER BY sysdate DESC) AS rn
         FROM checklist
         ${where}
       ) t
+      INNER JOIN building b on t.build_id = b.build_id
       WHERE t.rn = 1
       ORDER BY sysdate ${orderBy === 'asc' ? 'ASC' : 'DESC'}
       OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
@@ -856,27 +667,19 @@ app.get('/api/checklistshistory-all', async (req, res) => {
 
     const result = await request.query(query);
     const checklists = result.recordset || [];
-    const total = countResult.recordset[0]?.total || 0;
 
     const formattedChecklists = checklists.map(item => ({
       id: item.refNum,
       submissionDate: item.sysdate,
       visitType: item.visitType,
       building: item.build_id,
-      build_desc: item.build_desc,
       unit: item.unit_desc,
-      unitType: item.unitType,
-      unitNature: item.unitNature,
-      emirates: item.placeDesc,
       tenant: item.CTenantName,
       contractNo: item.contract_id,
       technician: item.userid,
       startDate: item.contract_sdate,
       endDate: item.contract_edate,
       refNum: item.refNum || '',
-      technicianSignature: item.technicianSignature,
-      tenantSignature: item.tenantSignature,
-      equipment: equipmentMap[item.refNum] || []
     }));
 
     res.json({
@@ -1111,56 +914,56 @@ app.post('/api/complaints',
   }
 );
 
-// app.get('/api/complaints', async (req, res) => {
-//   try {
-//     const { tenant } = req.query;
-//     const db = await connectEstate(req.session.companyConfig); // Use your estate DB connection
+app.get('/api/complaints', async (req, res) => {
+  try {
+    const { tenant } = req.query;
+    const db = await connectEstate(req.session.companyConfig); // Use your estate DB connection
 
-//     // Build query and parameters
-//     let query = `
-//       SELECT c.*, f.id AS file_id, f.file_name, f.file_type, f.mime_type
-//       FROM complaints c
-//       LEFT JOIN complaint_files f ON c.id = f.complaint_id
-//     `;
-//     let params = [];
-//     if (tenant) {
-//       query += ' WHERE c.tenant = @tenant';
-//       params.push({ name: 'tenant', type: sql.NVarChar, value: tenant });
-//     }
+    // Build query and parameters
+    let query = `
+      SELECT c.*, f.id AS file_id, f.file_name, f.file_type, f.mime_type
+      FROM complaints c
+      LEFT JOIN complaint_files f ON c.id = f.complaint_id
+    `;
+    let params = [];
+    if (tenant) {
+      query += ' WHERE c.tenant = @tenant';
+      params.push({ name: 'tenant', type: sql.NVarChar, value: tenant });
+    }
 
-//     const request = db.request();
-//     params.forEach(p => request.input(p.name, p.type, p.value));
-//     const result = await request.query(query);
+    const request = db.request();
+    params.forEach(p => request.input(p.name, p.type, p.value));
+    const result = await request.query(query);
 
-//     // Group files by complaint
-//     const complaintsMap = {};
-//     for (const row of result.recordset) {
-//       if (!complaintsMap[row.id]) {
-//         complaintsMap[row.id] = {
-//           ...row,
-//           files: []
-//         };
-//       }
-//       if (row.file_id) {
-//         complaintsMap[row.id].files.push({
-//           file_id: row.file_id,
-//           file_name: row.file_name,
-//           file_type: row.file_type,
-//           mime_type: row.mime_type,
-//           url: `/api/complaint-image/${row.file_id}`
-//         });
-//       }
-//     }
+    // Group files by complaint
+    const complaintsMap = {};
+    for (const row of result.recordset) {
+      if (!complaintsMap[row.id]) {
+        complaintsMap[row.id] = {
+          ...row,
+          files: []
+        };
+      }
+      if (row.file_id) {
+        complaintsMap[row.id].files.push({
+          file_id: row.file_id,
+          file_name: row.file_name,
+          file_type: row.file_type,
+          mime_type: row.mime_type,
+          url: `/api/complaint-image/${row.file_id}`
+        });
+      }
+    }
 
-//     // Convert map to array
-//     const complaints = Object.values(complaintsMap);
+    // Convert map to array
+    const complaints = Object.values(complaintsMap);
 
-//     res.json(complaints);
-//   } catch (err) {
-//     console.error('Error fetching complaints:', err);
-//     res.status(500).json({ success: false, message: 'Failed to fetch complaints', error: err.message });
-//   }
-// });
+    res.json(complaints);
+  } catch (err) {
+    console.error('Error fetching complaints:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch complaints', error: err.message });
+  }
+});
  
 app.get('/api/complaint-image/:id', async (req, res) => {
   try {
@@ -1222,128 +1025,35 @@ app.get('/api/check-estimation-exists/:refNum', async (req, res) => {
   }
 });
 
-//check if checklist has existing estimation cost is approved
-app.get('/api/check-estimation-approved/:refNum', async (req, res) => {
-  try {
-    const db = await connectEstate(req.session.companyConfig);
-    const { refNum } = req.params;
-    
-    // Find estimation with this RefNum that is approved (AuthLevel 3 or 5)
-    const request = db.request();
-    request.input('refNum', sql.NVarChar, refNum);
-    const result = await request.query(`
-      SELECT TOP 1 srno, authLevel, authStatus
-      FROM estimationcost_header
-      WHERE authStatus = 'Approved' AND RefNum = @refNum 
-    `);
-//     console.log('Checking estimation for RefNum:', refNum);
-// console.log('SQL result:', result.recordset);
-    const existingEstimation = result.recordset[0];
-
-    res.json({
-      success: true,
-      exists: !!existingEstimation,
-      estimation: existingEstimation
-        ? {
-            Srno: existingEstimation.srno,
-            AuthLevel: existingEstimation.authLevel,
-            AuthStatus: existingEstimation.authStatus,
-          }
-        : null,
-    });
-  } catch (err) {
-    console.error('Error checking estimation exists:', err);
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
 // Search estimation costs by reference number
-// app.get('/api/search-estimations', async (req, res) => {
-//   try {
-//     const db = await connectEstate(req.session.companyConfig); // Use your estate DB connection
-//     const { search } = req.query;
-
-//     let query = `
-//       SELECT TOP 50
-//         Srno,
-//         Trno,
-//         RefNum,
-//         t.CTenantName,
-//         b.build_desc,
-//         unit_desc,
-//         AuthStatus,
-//         TrDate
-//       FROM estimationcost_header eh
-//       INNER JOIN building b on eh.build_id = b.build_id
-//       INNER JOIN tenant t on eh.both = t.both
-//       WHERE 1=1
-//     `;
-
-//     if (search) {
-//       query += ' AND RefNum LIKE @search';
-//     }
-
-//     query += ' ORDER BY TrDate DESC';
-
-//     const request = db.request();
-//     if (search) {
-//       request.input('search', sql.NVarChar, `%${search}%`);
-//     }
-
-//     const result = await request.query(query);
-
-//     const formatted = result.recordset.map(est => ({
-//       Srno: est.Srno,
-//       Trno: est.Trno,
-//       RefNum: est.RefNum,
-//       TenantName: est.TenantName,
-//       building_id: est.building_id,
-//       unit_desc: est.unit_desc,
-//       AuthStatus: est.AuthStatus,
-//       TrDate: est.TrDate
-//     }));
-
-//     res.json({ success: true, estimations: formatted });
-//   } catch (err) {
-//     console.error('Error searching estimations:', err);
-//     res.status(500).json({ success: false, error: err.message });
-//   }
-// });
-
 app.get('/api/search-estimations', async (req, res) => {
   try {
-    const db = await connectEstate(req.session.companyConfig);
+    const db = await connectEstate(req.session.companyConfig); // Use your estate DB connection
     const { search } = req.query;
 
     let query = `
       SELECT TOP 50
-        eh.Srno,
-        eh.Trno,
-        eh.RefNum,
-        ISNULL(t.CTenantName, '') AS TenantName,
-        ISNULL(b.build_desc, '') AS build_desc,
-        eh.unit_desc,
-        eh.AuthStatus,
-        eh.TrDate
+        Srno,
+        Trno,
+        RefNum,
+        t.CTenantName,
+        b.build_desc,
+        unit_desc,
+        AuthStatus,
+        TrDate
       FROM estimationcost_header eh
-      LEFT JOIN building b ON eh.build_id = b.build_id
-      LEFT JOIN tenant t ON eh.both = t.both
+      INNER JOIN building b on eh.build_id = b.build_id
+      INNER JOIN tenant t on eh.both = t.both
       WHERE 1=1
     `;
 
     if (search) {
-      query += ` 
-        AND (
-          eh.RefNum LIKE @search
-          OR eh.Trno LIKE @search
-          OR t.CTenantName LIKE @search
-        )
-      `;
+      query += ' AND RefNum LIKE @search';
     }
 
-    query += ' ORDER BY eh.TrDate DESC';
+    query += ' ORDER BY TrDate DESC';
 
     const request = db.request();
-
     if (search) {
       request.input('search', sql.NVarChar, `%${search}%`);
     }
@@ -1355,20 +1065,18 @@ app.get('/api/search-estimations', async (req, res) => {
       Trno: est.Trno,
       RefNum: est.RefNum,
       TenantName: est.TenantName,
-      build_desc: est.build_desc,
+      building_id: est.building_id,
       unit_desc: est.unit_desc,
       AuthStatus: est.AuthStatus,
       TrDate: est.TrDate
     }));
 
     res.json({ success: true, estimations: formatted });
-
   } catch (err) {
     console.error('Error searching estimations:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
 
 app.post('/api/generate-checklist-pdf', async (req, res) => {
   const { reportData, selectedEquipment, username, barcodeBase64 } = req.body;
@@ -1685,102 +1393,37 @@ app.post('/api/generate-checklist-pdf', async (req, res) => {
   }
 });
 
-// app.get('/api/estimation-cost/:srno', async (req, res) => {
-//   const { srno } = req.params;
-//   try {
-//     const db = await connectEstate(req.session.companyConfig); // Use your estate DB connection
-
-//     // Fetch header
-//     const headerRequest = db.request();
-//     headerRequest.input('srno', sql.Int, srno);
-//     const headerResult = await headerRequest.query(`
-//       SELECT trno, srno, refNum, contract_id, t.CTenantName, b.build_desc, eh.unit_desc, eh.sysdate, eh.visitType, 
-//       eh.contract_sdate, eh.contract_edate, preparedBy, verifiedBy, approvedBy, eh.authLevel, eh.authStatus, eh.remarks
-//       FROM estimationcost_header eh
-//       INNER JOIN building b on eh.build_id = b.build_id
-//       INNER JOIN tenant t on eh.both = t.both
-//       WHERE Srno = @srno
-//     `);
-
-//     if (!headerResult.recordset.length) {
-//       return res.status(404).json({ success: false, error: 'Estimation cost not found' });
-//     }
-//     const header = headerResult.recordset[0];
-
-//     // Fetch equipment details
-//     const equipmentRequest = db.request();
-//     equipmentRequest.input('srno', sql.Int, srno);
-//     const equipmentResult = await equipmentRequest.query(`
-//       SELECT *
-//       FROM estimationcost_details
-//       WHERE Srno = @srno
-//       ORDER BY counter ASC
-//     `);
-//     const equipment = equipmentResult.recordset;
-
-//     res.json({
-//       success: true,
-//       header,
-//       equipment
-//     });
-//   } catch (err) {
-//     console.error('Error fetching estimation cost:', err);
-//     res.status(500).json({ success: false, error: err.message });
-//   }
-// });
-
 app.get('/api/estimation-cost/:srno', async (req, res) => {
   const { srno } = req.params;
-
   try {
-    const db = await connectEstate(req.session.companyConfig);
+    const db = await connectEstate(req.session.companyConfig); // Use your estate DB connection
 
-    // 🔹 Fetch header
+    // Fetch header
     const headerRequest = db.request();
     headerRequest.input('srno', sql.Int, srno);
-
     const headerResult = await headerRequest.query(`
-      SELECT 
-        eh.trno,
-        eh.srno,
-        eh.refNum,
-        eh.contract_id,
-        ISNULL(t.CTenantName, '') AS CTenantName,
-        ISNULL(b.build_desc, '') AS build_desc,
-        eh.unit_desc,
-        eh.sysdate,
-        eh.visitType,
-        eh.contract_sdate,
-        eh.contract_edate,
-        eh.preparedBy,
-        eh.verifiedBy,
-        eh.approvedBy,
-        eh.authLevel,
-        eh.authStatus,
-        eh.remarks
+      SELECT trno, srno, refNum, contract_id, t.CTenantName, b.build_desc, eh.unit_desc, eh.sysdate, eh.visitType, 
+      eh.contract_sdate, eh.contract_edate, preparedBy, verifiedBy, approvedBy, eh.authLevel, eh.authStatus, eh.remarks
       FROM estimationcost_header eh
-      LEFT JOIN building b ON eh.build_id = b.build_id
-      LEFT JOIN tenant t ON eh.both = t.both
-      WHERE eh.Srno = @srno
+      INNER JOIN building b on eh.build_id = b.build_id
+      INNER JOIN tenant t on eh.both = t.both
+      WHERE Srno = @srno
     `);
 
     if (!headerResult.recordset.length) {
       return res.status(404).json({ success: false, error: 'Estimation cost not found' });
     }
-
     const header = headerResult.recordset[0];
 
-    // 🔹 Fetch equipment details
+    // Fetch equipment details
     const equipmentRequest = db.request();
     equipmentRequest.input('srno', sql.Int, srno);
-
     const equipmentResult = await equipmentRequest.query(`
       SELECT *
       FROM estimationcost_details
       WHERE Srno = @srno
       ORDER BY counter ASC
     `);
-
     const equipment = equipmentResult.recordset;
 
     res.json({
@@ -1788,7 +1431,6 @@ app.get('/api/estimation-cost/:srno', async (req, res) => {
       header,
       equipment
     });
-
   } catch (err) {
     console.error('Error fetching estimation cost:', err);
     res.status(500).json({ success: false, error: err.message });
@@ -1797,8 +1439,6 @@ app.get('/api/estimation-cost/:srno', async (req, res) => {
 
 app.post('/api/save-estimation-cost', async (req, res) => {
   const { header, equipment, srno } = req.body;
-
-  //console.log('Received estimation cost save request. Header:', header, 'Equipment:', equipment, 'Srno:', srno);
 
   if (!header || !Array.isArray(equipment)) {
     return res.status(400).json({ success: false, error: 'Missing header or equipment array' });
@@ -1914,7 +1554,7 @@ app.post('/api/save-estimation-cost', async (req, res) => {
       insertHeaderRequest.input('verifiedBy', sql.NVarChar, '');
       insertHeaderRequest.input('approvedBy', sql.NVarChar, '');
       insertHeaderRequest.input('authLevel', sql.Int, 1);
-      insertHeaderRequest.input('authStatus', sql.NVarChar, 'Awaiting for Verification');
+      insertHeaderRequest.input('authStatus', sql.NVarChar, 'Pending Verification');
       await insertHeaderRequest.query(`
         INSERT INTO estimationcost_header
           (trno, srno, refNum, trdate, userid, contract_id, both, build_id, unit_desc, 

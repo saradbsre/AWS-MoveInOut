@@ -2,23 +2,7 @@ import React, { useState, useEffect} from 'react';
 import ReportView from '../moveinout/ReportView';
 import ReportHeader from '@/assets/bsreheader.png'
 // import { formatDateTimeLong } from '@/utils/DateFormat';
-import { getChecklist } from '@/services/Transaction/Contract/Contractapi';
 import '@/styles/ChecklistHistory.css'
-
-
-type Checklist = {
-  refNum: string;
-  id: string | number;
-  submissionDate?: string;
-  visitType?: string;
-  tenant?: string;
-  building?: string;
-  unit?: string;
-  contractNo?: string;
-  startDate?: string;
-  endDate?: string;
-  technician?: string;
-};
 
 interface EquipmentItem {
   id: string;
@@ -26,11 +10,8 @@ interface EquipmentItem {
   itemname: string;
   unit: string;
   qty: number;
-  status: "good" | "not working";
+  status: "good" | "not working"; // <-- restrict to these values
   remarks: string;
-  brdcode: string; // Add this
-  subcode: string; // Add this
-  // Add any other fields required by SelectedItem
 }
 // Define interfaces for our data
 interface ChecklistItem {
@@ -38,9 +19,10 @@ interface ChecklistItem {
   refNum: string;
   id: string;
   userid: string;
-  submissionDate: Date;
+  submissionDate: string;
   visitType: string; // "MOVE IN" or "MOVE OUT"
   building: string;
+  buildingDesc: string;
   unit: string;
   tenant: string;
   startDate: string;
@@ -50,15 +32,7 @@ interface ChecklistItem {
   equipment: EquipmentItem[];
   tenantSignature: string;
   technicianSignature: string;
-  images: string[];
-  videos: string[];
-  Reference: string;
-  unitNature: string;
-  unitType: string;
-  emirates: string;
 }
-
-
 
 export default function TenantReport() {
   const [checklists, setChecklists] = useState<ChecklistItem[]>([]);
@@ -137,41 +111,50 @@ export default function TenantReport() {
   }
   setCurrentPage(1);
   };
-    const username = sessionStorage.getItem('username') || '';
-      const roleid = sessionStorage.getItem('role') || '';
- useEffect(() => {
-    
+  useEffect(() => {
     const fetchChecklists = async () => {
       setLoading(true);
-      const username = sessionStorage.getItem('username');
-      if (!username) {
-        setChecklists([]);
-        // setTotal(0);
-        setLoading(false);
-        return;
-      }
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory`;
+
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        pageSize: String(itemsPerPage),
+        orderBy,
+      });
+
+      if (filterDate) params.append('filterType', 'date');
+      if (filterDate) params.append('filterDate', filterDate);
+      if (filterBuilding) params.append('filterBuilding', filterBuilding);
+      if (filterUnit) params.append('filterUnit', filterUnit);
+      if (filterTechnician) params.append('filterTechnician', filterTechnician);
+      if (filterContractNo) params.append('filterContractNo', filterContractNo);
+
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory?${params.toString()}`;
       const response = await fetch(apiUrl, { credentials: 'include' });
       const data = await response.json();
+
       setChecklists(
-        data.checklists.map((item: any) => ({
+        (data.checklists || []).map((item: any) => ({
           ...item,
-          equipment: item.equipment ? (typeof item.equipment === 'string' ? JSON.parse(item.equipment) : item.equipment) : [],
-          files: item.files || []    // preserve files returned by backend
+          equipment: item.equipment
+            ? (typeof item.equipment === 'string' ? JSON.parse(item.equipment) : item.equipment)
+            : [],
+          files: item.files || []
         }))
       );
-      // setTotal(data.total);
+
+      setTotal(Number(data.total || 0));
+      setTotalPages(Number(data.totalPages || 1));
       setLoading(false);
     };
 
     fetchChecklists();
-  }, []);
+  }, [currentPage, orderBy, filterDate, filterBuilding, filterUnit, filterTechnician, filterContractNo]);
 
  const filteredChecklists = checklists
  
   .filter(item => {
     if (filterDate) {
-      const itemDate = item.submissionDate.toISOString().slice(0, 10);
+      const itemDate = item.submissionDate.slice(0, 10);
       return itemDate === filterDate;
     }
     return true;
@@ -184,17 +167,16 @@ export default function TenantReport() {
     let aValue = a[sortColumn as keyof ChecklistItem];
     let bValue = b[sortColumn as keyof ChecklistItem];
 
-  if (sortColumn === 'submissionDate') {
-    // Handle Date objects
-    const aDate = aValue instanceof Date ? aValue : new Date(aValue as string);
-    const bDate = bValue instanceof Date ? bValue : new Date(bValue as string);
-    const direction = orderBy === 'asc' ? 1 : -1;
-    return direction * (aDate.getTime() - bDate.getTime());
-  }
-  if (typeof aValue === 'string' && typeof bValue === 'string') {
-    const direction = sortDirection === 'asc' ? 1 : -1;
-    return direction * aValue.localeCompare(bValue);
-  }
+    if (sortColumn === 'submissionDate') {
+      aValue = (aValue as string) || '';
+      bValue = (bValue as string) || '';
+      const direction = orderBy === 'asc' ? 1 : -1;
+      return direction * aValue.localeCompare(bValue);
+    }
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      const direction = sortDirection === 'asc' ? 1 : -1;
+      return direction * aValue.localeCompare(bValue);
+    }
     return 0;
   });
   
@@ -207,29 +189,21 @@ export default function TenantReport() {
   }
 }, [filteredChecklists.length]);
   if (selectedChecklist) {
-    //console.log('Selected Checklist:', selectedChecklist);
-    // console.log('Selected Checklist Equipment:', selectedChecklist.equipment);
-    //  console.log('ReportView Props:', {
-    //     reportData: selectedChecklist,
-    //     selectedEquipment: selectedChecklist.equipment,
-    //     onNewChecklist: () => setSelectedChecklist(null),
-    //     fromHistory: true,
-    //   })
     return (
       <ReportView
-      reportData={selectedChecklist}
-      selectedEquipment={selectedChecklist.equipment }
-      onNewChecklist={() => setSelectedChecklist(null)}
-      fromHistory={true}
+        Reference={selectedChecklist.refNum}
+        onNewChecklist={() => setSelectedChecklist(null)}
+        barcodeValue={`${selectedChecklist.visitType}-${selectedChecklist.contractNo}-${selectedChecklist.submissionDate.slice(0,10)}`}
+        barcodeBase64={''}
+        fromHistory={true}
       />
-     
     );
   }
 
 function groupByDate(items: ChecklistItem[]) {
   const groups: { [date: string]: ChecklistItem[] } = {};
   items.forEach(item => {
-    const date = item.submissionDate.toISOString().slice(0, 10);
+    const date = item.submissionDate.slice(0, 10);
     if (!groups[date]) groups[date] = [];
     groups[date].push(item);
   });
@@ -445,7 +419,7 @@ return (
                       onClick={() => setSelectedChecklist(checklist)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {checklist.submissionDate ? checklist.submissionDate.toISOString().slice(0, 10) : ''}
+                        {checklist.submissionDate ? checklist.submissionDate.slice(0, 10) : ''}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -458,7 +432,7 @@ return (
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">{checklist.refNum}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{checklist.tenant}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{checklist.building}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{checklist.buildingDesc}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{checklist.unit}</td>                    
                       <td className="px-6 py-4 whitespace-nowrap">{checklist.contractNo}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -560,7 +534,7 @@ return (
                   className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                   onClick={() => setSelectedChecklist(checklist)}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {checklist.submissionDate ? checklist.submissionDate.toISOString().slice(0, 10) : ''}
+                    {checklist.submissionDate ? checklist.submissionDate.slice(0, 10) : ''}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -573,7 +547,7 @@ return (
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">{checklist.refNum}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{checklist.tenant}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{checklist.building}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{checklist.buildingDesc}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{checklist.unit}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{checklist.contractNo}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -642,7 +616,7 @@ return (
       {filteredChecklists.map((checklist, idx) => (
         <tr key={checklist.id}>
           <td className="px-1 py-1 border border-black text-xs text-black text-center">{idx + 1}</td>
-          <td className="px-1 py-1 border border-black text-xs text-black whitespace-nowrap">{checklist.submissionDate?.toISOString().slice(0, 10)}</td>
+          <td className="px-1 py-1 border border-black text-xs text-black whitespace-nowrap">{checklist.submissionDate?.slice(0, 10)}</td>
           <td className="px-1 py-1 border border-black text-xs text-black text-nowrap">{checklist.visitType}</td>
           <td className="px-1 py-1 border border-black text-xs text-black text-center">{checklist.refNum}</td>
           <td className="px-1 py-1 border border-black text-xs text-black w-40 ">{checklist.tenant}</td>

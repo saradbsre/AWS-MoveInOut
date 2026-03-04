@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ChecklistHistory from './checklist/ChecklistHistory';
 import TechnicianDashboard from './moveinout/technician/TechnicianDashboard';
+import { getRoleGroup } from '../utils/getRoleGroup';
+
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
@@ -29,8 +31,8 @@ export default function Dashboard() {
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
         }}
       >
-        {userRole === 'System Administrator' && <ChecklistHistory />}
-        {userRole === 'TECHNICIAN' && <TechnicianDashboard />}
+        {rawRole === 'System Administrator' && <ChecklistHistory />}
+        {rawRole === 'TECHNICIAN' && <TechnicianDashboard />}
       </div>
     </div>
   );

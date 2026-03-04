@@ -180,7 +180,7 @@ useEffect(() => {
         }));
         const mapped: ReportData = {
           technician: first.userid || '',
-          building: first.build_desc || '',
+          building: first.build_id || '',
           unit: first.unit_desc || '',
           tenantCode: first.both || '',
           tenant: first.CTenantName || '',
