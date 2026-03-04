@@ -94,14 +94,6 @@ export default function ComplaintAuthButtons({
         });
       } else if (actionType === 'cancel') {
         result = await deleteComplaint(complaintId as string);
-      } else {
-        result = await editComplaint({
-          complaint_id: complaintId as string,
-          description: remarks,
-          block: '',
-          place: '',
-          floor: ''
-        });
       }
 
       if (result.success) {

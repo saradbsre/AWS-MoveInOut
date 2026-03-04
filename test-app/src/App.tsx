@@ -20,7 +20,6 @@ import MoveInOutReqForm from './pages/MoveInOutReqForm';
 import TechnicianComplaintReport from './pages/moveinout/technician/TechnicianComplaintReport';
 import CatTechMaintenance from './pages/CatTechMaintenance';
 import ComplaintChecklist from './pages/moveinout/technician/ComplaintChecklist';
-import AssignTechnicianPage from './pages/maintenance/AssignTechnicianPage';
 import CheckListView from './pages/maintenance/CheckListView';
 import CheckListViewWrapper from './pages/maintenance/CheckListViewWrapper';
 

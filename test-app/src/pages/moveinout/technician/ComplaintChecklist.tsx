@@ -273,7 +273,6 @@ useEffect(() => {
       videos: videos,
       equipment: selectedEquipment,
       Reference: refNum ,// <-- use complaint number
-      subComp_id: subComp_id // <-- use subComp_id
     };
     //console.log('Base submission data prepared:', baseSubmissionData);
     const barcodeValue = `${visitType}-${refNum}-${formatDateShort(baseSubmissionData.submissionDate)}`;
