@@ -66,8 +66,8 @@ export default function Layout() {
           "Move in/Out Report",
           "Estimation Cost",
           "Estimation Cost Report",
-          "Pending Complaints Register",
-          "Complaint Category"
+          // "Pending Complaints Register",
+          // "Complaint Category" 
           
           // Add more as you create them in the cloud
         ];
