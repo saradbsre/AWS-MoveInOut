@@ -3,6 +3,34 @@ const ContractModel = require('../models/contractModel');
 const { connect } = require('../config/db');
 const multer = require('multer');
 const upload = multer();
+const sharp = require('sharp');
+
+async function compressImage(file) {
+  // keep non-images unchanged
+  if (!file?.mimetype?.startsWith('image/')) {
+    return { buffer: file.buffer, mimetype: file.mimetype };
+  }
+
+  // resize + convert to webp
+  let quality = 75;
+  let out = await sharp(file.buffer)
+    .rotate()
+    .resize({ width: 1600, withoutEnlargement: true })
+    .webp({ quality })
+    .toBuffer();
+
+  // optional: reduce more if still large (> 400 KB)
+  while (out.length > 400 * 1024 && quality > 45) {
+    quality -= 5;
+    out = await sharp(file.buffer)
+      .rotate()
+      .resize({ width: 1600, withoutEnlargement: true })
+      .webp({ quality })
+      .toBuffer();
+  }
+
+  return { buffer: out, mimetype: 'image/webp' };
+}
 
 
 // Get contracts with contract_cflag = N
@@ -157,7 +185,14 @@ exports.insertchecklist = async (req, res) => {
     }
     if (req.files && req.files.images) {
       for (const file of req.files.images) {
-        await ContractModel.InsertChecklistImages(contract, refNum, file.buffer, file.mimetype, req.session.companyConfig);
+        const compressed = await compressImage(file);
+        await ContractModel.InsertChecklistImages(
+          contract,
+          refNum,
+          compressed.buffer,
+          compressed.mimetype,
+          req.session.companyConfig
+        );
       }
     }
 
@@ -226,9 +261,16 @@ exports.insertComplaint = async (req, res) => {
       authStatus
     }, req.session.companyConfig);
 
-     if (req.files && req.files.images) {
+    if (req.files && req.files.images) {
       for (const file of req.files.images) {
-        await ContractModel.InsertComplaintImages(build_id, complaintNum, file.buffer, file.mimetype, req.session.companyConfig);
+        const compressed = await compressImage(file);
+        await ContractModel.InsertComplaintImages(
+          build_id,
+          complaintNum,
+          compressed.buffer,
+          compressed.mimetype,
+          req.session.companyConfig
+        );
       }
     }
 

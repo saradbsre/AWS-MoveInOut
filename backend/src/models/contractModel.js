@@ -209,7 +209,7 @@ class ContractModel {
         }
 
         return true;
-    } catch (error) {
+    } catch (error) {   
         throw new Error(`Error inserting checklist: ${error.message}`);
     }
 }

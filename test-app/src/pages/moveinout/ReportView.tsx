@@ -24,6 +24,7 @@ export interface ReportData {
   unit: string;
   tenantCode: string;
   tenant: string;
+  building_desc: string;
   contractNo: string;
   startDate: string;
   endDate: string;
@@ -181,6 +182,7 @@ useEffect(() => {
         const mapped: ReportData = {
           technician: first.userid || '',
           building: first.build_id || '',
+          building_desc: first.build_desc || '',
           unit: first.unit_desc || '',
           tenantCode: first.both || '',
           tenant: first.CTenantName || '',
@@ -412,7 +414,7 @@ useEffect(() => {
                     Building
                   </td>
                   <td className="w-1/2 bg-white p-2 text-xs font-normal text-black border border-black" colSpan={5}>
-                    {reportData.building}
+                    {reportData.building_desc}
                   </td>
                 </tr>
                 {/* Visit Type Row */}
