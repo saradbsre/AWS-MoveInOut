@@ -18,6 +18,7 @@ interface ReportData {
   technicianSignature: string; // base64 or URL
   images: number;
   videos: number;
+  subComp_id?: string | number;
 }
 
 interface ReportPDFProps {

@@ -13,6 +13,16 @@ import ChecklistReport from '@/pages/checklist/ChecklistReport';
 import EstimationCost from '@/pages/maintenance/EstimationCost';
 import EstimationReport from '@/pages/maintenance/EstimationCostReport';
 import EstimationCostReportView from '@/pages/maintenance/EstimationCostReportView';
+import ComplaintForm from './pages/ComplaintForm';
+import ComplaintReport from './pages/branch/ComplaintReport';
+import BranchComplaintReport from './pages/maintenance/ComplaintReport';
+import MoveInOutReqForm from './pages/MoveInOutReqForm';
+import TechnicianComplaintReport from './pages/moveinout/technician/TechnicianComplaintReport';
+import CatTechMaintenance from './pages/CatTechMaintenance';
+import ComplaintChecklist from './pages/moveinout/technician/ComplaintChecklist';
+import AssignTechnicianPage from './pages/maintenance/AssignTechnicianPage';
+import CheckListView from './pages/maintenance/CheckListView';
+import CheckListViewWrapper from './pages/maintenance/CheckListViewWrapper';
 
 function NotFound() {
   return (
@@ -46,7 +56,6 @@ function App() {
 
       {/* Protected routes inside Layout */}
       <Route element={<RequireAuth><Layout /></RequireAuth>}>
-        <Route path="Dashboard" element={<ProtectedModule modulePath="Dashboard"><Dashboard /></ProtectedModule>} />
         <Route path="Move &In Register" element={<ProtectedModule modulePath="Move &In Register"><Moveinout key={location.key} /></ProtectedModule>} />
         <Route
           path="Move in/Out Report"
@@ -64,6 +73,9 @@ function App() {
             </ProtectedModule>
           }
         />
+        {/* Allow both /Dashboard and /&Dashboard for compatibility */}
+        <Route path="Dashboard" element={<ProtectedModule modulePath="&Dashboard"><Dashboard /></ProtectedModule>} />
+        <Route path="&Dashboard" element={<ProtectedModule modulePath="&Dashboard"><Dashboard /></ProtectedModule>} />
         <Route path="Estimation Cost" element={
           <ProtectedModule modulePath="Estimation Cost">
             <EstimationCost 
@@ -78,9 +90,35 @@ function App() {
         {/* Un Protected Routes */}
         <Route path="UserCreation" element={<UserCreation />} />
         <Route path="ChecklistHistory" element={<ChecklistHistory />} />
+        <Route path="&Tenant Master Maintenance" element={<ComplaintForm />} />
         {/* <Route path="EstimationCost" element={<EstimationCost />} /> */}
         <Route path="EstimationCostReport" element={<EstimationReport />} />
         <Route path="EstimationCostReportView/:srno" element={<EstimationCostReportView />} />
+        <Route path="&Complaint Register" element={<ComplaintForm />} />
+        {/* <Route path="&Tenant Master Maintenance" element={<ComplaintReport />} /> */}
+        {/* <Route path="Pending Complaints Register" element={<BranchComplaintReport />} /> */}
+        <Route path="Move &Out Register" element={<MoveInOutReqForm/>} />
+        <Route
+          path="Pending Complaints Register"
+          element={
+            <ProtectedModule modulePath="Pending Complaints Register">
+              {
+                (() => {
+                  const roleid = sessionStorage.getItem('role')
+                  // console.log('App roleid:', roleid);
+          
+                  if (roleid === 'TECHNICIAN') return <TechnicianComplaintReport />;
+                  if (roleid === 'System Administrator' || roleid === 'Maintenance') return <BranchComplaintReport />;
+                  if (roleid && roleid.toLowerCase().includes('branch')) return <ComplaintReport />;
+                  return <NotFound />;
+                })()
+              }
+            </ProtectedModule>
+          }
+        />
+        <Route path="Complaint Category" element={<CatTechMaintenance />} />
+        <Route path="&Complaint Register" element={<ComplaintChecklist />} />
+        <Route path="CheckListView" element={<CheckListViewWrapper />} />
         {/* Catch-all route for 404 Not Found */}
         <Route path="*" element={<NotFound />} />
       </Route>

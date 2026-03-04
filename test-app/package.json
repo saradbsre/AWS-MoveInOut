@@ -14,6 +14,7 @@
     "@tanstack/react-query": "^5.77.2",
     "axios": "^1.9.0",
     "chart.js": "^4.5.0",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "flowbite": "^3.1.2",
     "flowbite-react": "^0.11.8",
@@ -24,9 +25,12 @@
     "react": "^18.3.1",
     "react-barcode": "^1.6.1",
     "react-chartjs-2": "^5.3.0",
+    "react-datepicker": "^9.1.0",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.56.4",
+    "react-modal": "^3.16.3",
     "react-router-dom": "^7.6.1",
+    "react-select": "^5.10.2",
     "react-signature-canvas": "^1.1.0-alpha.2",
     "react-to-pdf": "^2.0.1",
     "react-to-print": "^3.1.1",
@@ -45,6 +49,7 @@
     "@types/jest": "^29.5.14",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
+    "@types/react-modal": "^3.16.3",
     "@types/react-router-dom": "^5.3.3",
     "@types/recharts": "^1.8.29",
     "@types/styled-components": "^5.1.34",
@@ -64,6 +69,6 @@
     "ts-jest": "^29.3.4",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
-    "vite": "^6.3.6"
+    "vite": "^6.4.1"
   }
 }

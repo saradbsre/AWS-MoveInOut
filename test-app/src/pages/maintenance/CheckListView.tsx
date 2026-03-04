@@ -9,6 +9,8 @@ import PageLoader from '@/components/PageLoader';
 import '@/styles/Moveinout.css'
 import axios from 'axios'
 import { useLocation, useNavigate } from 'react-router-dom';
+import AssigningForm from '@/components/complaintcomponents/AssigningForm';
+import CheckListPrint from './CheckListPrint';
 
 interface EquipmentItem {
   id: string;
@@ -26,15 +28,12 @@ export interface ReportData {
   tenantCode: string;
   tenant: string;
   contractNo: string;
-  startDate: string;
-  endDate: string;
+  contract_sdate: string;
+  contract_edate: string;
   visitType: string;
   submissionDate: Date;
-  tenantSignature: string;
-  technicianSignature: string;
-  equipment: EquipmentItem[];
-  // images: number;
-  // videos: number;
+  tenantsignature: string;
+  techniciansignature: string;
   images: (string | File | Blob | { url?: string; file_id?: string })[];
   videos: (string | File | Blob | { url?: string; file_id?: string })[];
   Reference: string;
@@ -42,6 +41,22 @@ export interface ReportData {
   unitNature?: string;
   unit_master_desc?: string;
   place_desc?: string;
+  items?: EquipmentItem[];
+  build_id?: string | number;
+  build_desc?: string;
+  CTenantname?: string;
+  contract_id?: string;
+  both?: string;
+  unit_desc?: string;
+  sysdate?: string;
+  assigned_to?: string;
+  complaintNum?: string;
+  unitType?: string;
+  technicianSignature?: string;
+  tenantSignature?: string;
+  emirates?: string;
+  complaint_id?: string;
+  id?: string;
 }
 
 interface ReportViewProps {
@@ -51,12 +66,14 @@ interface ReportViewProps {
   barcodeValue: string;
   barcodeBase64: string;
   fromHistory?: boolean;
-  subComp_id?: string | number;
+  disableActions?: boolean;
+  fromViewType?: string; 
+  onBack?: () => void;
 }
 
 
 
-export default function ReportView({ Reference,reportData: propReportData, onNewChecklist, fromHistory }: ReportViewProps) {
+export default function CheckListView({ Reference,reportData: propReportData, onNewChecklist, fromHistory, disableActions = false, fromViewType, onBack }: ReportViewProps) {
   const navigate = useNavigate();
   // const barcodeBase64 = generateBarcodeBase64(barcodeValue);
   const username = sessionStorage.getItem('username') || 'User';
@@ -68,10 +85,13 @@ export default function ReportView({ Reference,reportData: propReportData, onNew
   const [barcodeBase64, setBarcodeBase64] = useState<string>("");
   const [showEstimationCost, setShowEstimationCost] = useState(false);
   const [hasActiveEstimation, setHasActiveEstimation] = useState(false);
+  const [isApprovedEstimation, setIsApprovedEstimation] = useState(false);
   const [checkingEstimation, setCheckingEstimation] = useState(true);
   const [reportData, setReportData] = useState<ReportData | null>(propReportData ?? null);
   const barcodeValue = reportData ? `${reportData.visitType}-${reportData.contractNo}-${getCurrentDateBarcode()}` : '';
   const apiUrl = import.meta.env.VITE_API_URL;
+
+ // console.log("reportData in CheckListView:", reportData);  
 
   function createPageFooter(): void {
       // Remove any existing footer elements and styles
@@ -125,6 +145,7 @@ export default function ReportView({ Reference,reportData: propReportData, onNew
   }
 
   useEffect(() => {
+    //console.log('Checking for existing estimation cost with Reference:', reportData?.Reference);
     const checkExistingEstimation = async () => {
       try {
         setCheckingEstimation(true);
@@ -133,7 +154,7 @@ export default function ReportView({ Reference,reportData: propReportData, onNew
           { credentials: 'include' }
         );
         const data = await response.json();
-        
+        //console.log('Estimation check response:', data);
         if (data.success) {
           setHasActiveEstimation(data.exists);
         }
@@ -149,6 +170,32 @@ export default function ReportView({ Reference,reportData: propReportData, onNew
     }
   }, [reportData?.Reference, showEstimationCost]);
 
+    useEffect(() => {
+    //console.log('Checking for existing approved estimation cost with Reference:', reportData?.Reference);
+    const checkExistingApprovedEstimation = async () => {
+      try {
+        setCheckingEstimation(true);
+        const response = await fetch(
+          `${apiUrl}/api/check-estimation-approved/${encodeURIComponent(reportData?.Reference || '')}`,
+          { credentials: 'include' }
+        );
+        const data = await response.json();
+        //console.log('Approved estimation check response:', data);
+        if (data.success) {
+          setIsApprovedEstimation(data.exists);
+        }
+      } catch (error) {
+        console.error('Error checking approved estimation:', error);
+      } finally {
+        setCheckingEstimation(false);
+      }
+    };
+
+    if (reportData && reportData.Reference) {
+      checkExistingApprovedEstimation();
+    }
+  }, [reportData?.Reference, showEstimationCost]);
+
   useEffect(() => {
     if (!barcodeValue) return;
     setBarcodeBase64(generateBarcodeBase64(barcodeValue));
@@ -156,9 +203,36 @@ export default function ReportView({ Reference,reportData: propReportData, onNew
 
 useEffect(() => {
    if (propReportData) {
-      setReportData(propReportData);
-      return;
-    }
+   // console.log('Mapping report data from props:', propReportData);
+ const mapped: ReportData = {
+  complaint_id: propReportData.id || propReportData.complaint_id || '',
+  technician: propReportData.assigned_to || '',
+  building: Array.isArray(propReportData.build_desc)
+    ? propReportData.build_desc[0]
+    : propReportData.build_desc || propReportData.building || propReportData.build_id || '',
+  unit_desc: propReportData.unit_desc || '',
+  build_id: propReportData.build_id,
+  tenant: propReportData.tenant|| propReportData.CTenantname || '',
+  tenantCode: propReportData.both || '',
+  contractNo: propReportData.contractNo || propReportData.contract_id || '',
+  contract_sdate: propReportData.contract_sdate || '',
+  contract_edate: propReportData.contract_edate || '',
+  visitType: propReportData.visitType || '',
+  submissionDate: propReportData.sysdate ? new Date(propReportData.sysdate) : new Date(),
+  tenantsignature: propReportData.tenantsignature || '',
+  techniciansignature: propReportData.techniciansignature || '',
+  items: propReportData.items || [],
+  images: propReportData.images || [],
+  videos: propReportData.videos || [],
+  Reference: propReportData.Reference || propReportData.complaintNum || '',
+  unit: propReportData.unit || '',
+  unitNature: propReportData.unitNature || '', // <-- always a string
+  unitType: propReportData.unit_master_desc || '',
+  emirates: propReportData.place_desc || '',
+};
+    setReportData(mapped);
+    return;
+  }
   if (!Reference) return;
   const fetchReportData = async () => {
     try {
@@ -182,23 +256,28 @@ useEffect(() => {
         }));
         const mapped: ReportData = {
           technician: first.userid || '',
-          building: first.build_id || '',
-          unit: first.unit_desc || '',
+          building: first.build_desc || first.building || first.build_id || '',
+          unit_desc: first.unit_desc || '',
           tenantCode: first.both || '',
           tenant: first.CTenantName || '',
-          contractNo: first.contract_id || '',
-          startDate: first.contract_sdate || '',
-          endDate: first.contract_edate || '',
+          contractNo: first.contract_id || first.contractNo || '',
+          contract_sdate: first.contract_sdate || '',
+          contract_edate: first.contract_edate || '',
           visitType: first.visitType || '',
           submissionDate: first.sysdate,
-          tenantSignature: first.tenantSignature || '',
-          technicianSignature: first.technicianSignature || '',
-          equipment,
+          tenantsignature: first.tenantsignature || '',
+          techniciansignature: first.techniciansignature || '',
+          //equipment,
           images: first.images || [],
           videos: first.videos || [],
           Reference: first.refNum || '',
+          unit: first.unit || '',
+          unitNature: first.unitNature || '',
+          unitType: first.unit_master_desc || '',
+          emirates: first.place_desc || '',
         };
         setReportData(mapped);
+        //console.log('Fetched and mapped report data:', mapped);
       } else {
         setReportData(null);
       }
@@ -211,18 +290,60 @@ useEffect(() => {
 }, [Reference, apiUrl, propReportData]);
 
   const handlePrint = () => {
-    // Create dynamic footer
-    // injectPrintSignatureFooter();
-    createPageFooter();
-    // Small delay to ensure footer is rendered
-    setTimeout(() => {
-      window.print();
-      // Clean up after printing
-      setTimeout(() => {
-        const footers = document.querySelectorAll('.dynamic-page-footer');
-        footers.forEach(footer => footer.remove());
-      }, 1000);
-    }, 100);
+    const printContents = printRef.current?.innerHTML;
+    if (!printContents) return;
+    let styles = '';
+    Array.from(document.querySelectorAll('style,link[rel="stylesheet"]')).forEach((node) => {
+      styles += node.outerHTML;
+    });
+    const printWindow = window.open('', '_blank', 'width=900,height=650');
+    if (!printWindow) return;
+    printWindow.document.open();
+    printWindow.document.write(`
+  <html>
+    <head>
+      <title>Checklist Report</title>
+      ${styles}
+      <style>
+        @page {
+          margin: 10mm 15mm 25mm 15mm;
+        }
+        @media print {
+          thead { display: table-header-group; }
+          @page {
+            @bottom-left {
+              content: "Printed By: ${username} | ${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}";
+              font-size: 10px;
+              font-family: 'Times New Roman', serif;
+              color: black;
+            }
+            @bottom-right {
+              content: "Page " counter(page) " of " counter(pages);
+              font-size: 10px;
+              font-family: 'Times New Roman', serif;
+              color: black;
+            }
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div>${printContents}</div>
+      <script>
+        window.onload = function() {
+          window.focus();
+          window.print();
+        }
+      </script>
+    </body>
+  </html>
+`);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      setTimeout(() => printWindow.close(), 500);
+    };
   };
 
   const handleSendEmail = async () => {
@@ -233,11 +354,13 @@ useEffect(() => {
       const payload = {
         reportData: {
           ...reportDataWithoutImages,
-          equipment: reportData?.equipment || '', // Always use the latest equipment from backend
+          items: reportData?.items || [], // Always use the latest items from backend
         },
         username,
         barcodeBase64,
       };
+
+      //console.log('Sending email with payload:', payload);  
       const res = await fetch(`${apiUrl}/api/generate-checklist-pdf`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -256,7 +379,14 @@ useEffect(() => {
         reader.readAsDataURL(blob);
       });
 
-      await fetch(`${import.meta.env.VITE_API_URL}/api/send-report`, {
+      const location = [reportData?.building, reportData?.unit]
+  .filter(Boolean)
+  .join(' / ');
+
+
+
+
+      await fetch(`${import.meta.env.VITE_API_URL}/api/send-complaintreport`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -271,7 +401,7 @@ useEffect(() => {
           companyName: 'ABDULWAHED AHMAD RASHED BIN SHABIB',
           contactNumber: '+971 55-580-9722',
           emailAddress: 'handover.bsre@gmail.com',
-          subject: `${reportData?.visitType} Checklist Report for Your Unit – ${reportData?.building} / ${reportData?.unit}`,
+          subject: `Complaint Report for Your Building – ${location}`,
         }),
       });
       // Show success modal instead of alert
@@ -296,19 +426,20 @@ useEffect(() => {
 
 
   if (showEstimationCost) {
+   // console.log('Rendering EstimationCost with data:', reportData);
   return (
     <EstimationCost
       EstimationCostData={{
         technician: reportData ? reportData.technician : '',
-        building: reportData ? reportData.building : '',
-        unit: reportData ? reportData.unit : '',
+        building: reportData ? reportData.build_id : '',
+        unit: reportData ? reportData.unit_desc : '',
         tenantCode: reportData ? reportData.tenantCode : '',
         tenant: reportData ? reportData.tenant : '',
         contractNo: reportData ? reportData.contractNo : '',
-        startDate: reportData ? reportData.startDate : '',
-        endDate: reportData ? reportData.endDate : '',
-        visitType: reportData ? reportData.visitType : '',
-        equipment: reportData ? reportData.equipment : [], // Pass the checklist equipment
+        start: reportData ? reportData.contract_sdate : '',
+        end: reportData ? reportData.contract_edate : '',
+        visitType: 'Complaint',
+        equipment: reportData ? reportData.items : [], // Pass the checklist items
         Reference: reportData ? reportData.Reference : '',
         submissionDate: reportData ? reportData.submissionDate : ''
       }}
@@ -325,6 +456,8 @@ useEffect(() => {
   if (!reportData) {
   return <div className="text-center py-8 text-gray-600">No checklist data found for this complaint.</div>;
 }
+
+//console.log('Report data is available, rendering CheckListView:', reportData);
 
   return (
     <>
@@ -363,7 +496,25 @@ useEffect(() => {
           </div>
         </div>
       )}
-      <div id="pdf-report" ref={printRef} className="print-container p-4 max-w-4xl mx-auto space-y-6 bg-white">
+        {/* Hidden print area */}
+            <div style={{ display: 'none' }}>
+              <div ref={printRef}>
+               <CheckListPrint
+                 reportData={{
+                    ...reportData,
+                    items: reportData.items || [],
+                    unitNature: reportData.unitNature || '',
+                    unitType: reportData.unitType || '',
+                    emirates: reportData.emirates || '',
+                    // ...add any other required fields here
+                }}
+                selectedEquipment={reportData.items || []}
+                fromHistory={fromHistory}
+                username={username}
+                />
+              </div>
+            </div>
+      <div className="print-content print-container p-4 max-w-4xl mx-auto space-y-6 bg-white">
         <div className="content-wrapper">
           {/* Company Header */}
           <div className="w-full mb-6">
@@ -407,19 +558,19 @@ useEffect(() => {
       <tr>
         <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">Tenant</td>
         <td className="w-2/3 bg-white p-2 text-xs font-normal text-black border border-black" colSpan={3}>
-          {!reportData.tenant || reportData.tenant.trim().toUpperCase() === "N/A" ? "Branch" : reportData.tenant}
+          { reportData.tenant?.trim() || "-" }
         </td>
       </tr>
       <tr>
         <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">Building</td>
         <td className="w-2/3 bg-white p-2 text-xs font-normal text-black border border-black" colSpan={3}>
-          {reportData.building?.trim() || "-"}
+          {typeof reportData.building === 'string' ? reportData.building.trim() : String(reportData.building || "-")}
         </td>
       </tr>
       <tr>
         <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">Unit</td>
         <td className="w-1/6 bg-white p-2 text-xs font-normal text-black border border-black">
-          {reportData.unit?.trim() || "-"}
+          {reportData.unit_desc?.trim() || "-"}
         </td>
         <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">Unit Nature</td>
         <td className="w-1/6 bg-white p-2 text-xs font-normal text-black border border-black">
@@ -433,7 +584,7 @@ useEffect(() => {
       <tr>
         <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">Unit Type</td>
         <td className="w-1/6 bg-white p-2 text-xs font-normal text-black border border-black">
-          {reportData.unit_master_desc?.trim() || "-"}
+          {reportData.unitType?.trim() || "-"}
          
         </td>
         <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">Visit Type</td>
@@ -448,18 +599,18 @@ useEffect(() => {
         </td>
         <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">Start Date</td>
         <td className="w-1/6 bg-white p-2 text-xs font-normal text-black border border-black">
-          {reportData.startDate ? formatDateShort(reportData.startDate) : "-"}
+          {reportData.contract_sdate ? formatDateShort(reportData.contract_sdate) : "-"}
         </td>
       </tr>
       <tr>
         <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">Emirates</td>
         <td className="w-1/6 bg-white p-2 text-xs font-normal text-black border border-black">
           {/* If you have a property for Emirates, use it here, else show '-' */}
-          {reportData.place_desc?.trim() || "-"}
+          {reportData.emirates?.trim() || "-"}
         </td>
         <td className="w-1/6 bg-white p-2 text-xs font-bold text-black border border-black">End Date</td>
         <td className="w-1/6 bg-white p-2 text-xs font-normal text-black border border-black">
-          {reportData.endDate ? formatDateShort(reportData.endDate) : "-"}
+          {reportData.contract_edate ? formatDateShort(reportData.contract_edate) : "-"}
         </td>
       </tr>
     </tbody>
@@ -482,25 +633,25 @@ useEffect(() => {
                   <th className="bg-white p-2 text-xs font-bold text-black border border-black w-[40%]">Item Name</th>
                   <th className="bg-white p-2 text-xs font-bold text-black border border-black w-[5%]">Unit</th>
                   <th className="bg-white p-2 text-xs font-bold text-black border border-black w-[10%]">QTY</th>
-                  <th className="bg-white p-2 text-xs font-bold text-black border border-black w-[10%]">Status</th>
+                  {/* <th className="bg-white p-2 text-xs font-bold text-black border border-black w-[10%]">Status</th> */}
                   <th className="bg-white p-2 text-xs font-bold text-black border border-black w-[30%]">Remarks</th>
                 </tr>
               </thead>
               <tbody>
-                {(reportData?.equipment?.length ?? 0) === 0 ? (
+                {(reportData?.items?.length ?? 0) === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-3 py-2 border border-black text-center text-xs sm:text-sm text-black font-bold">
                       Condition All Good
                     </td>
                   </tr>
                 ) : (
-                  (reportData?.equipment ?? []).map((item, idx) => (
+                  (reportData?.items ?? []).map((item, idx) => (
                     <tr key={item.id || idx}>
                       <td className="px-3 py-2 border border-black text-xs text-black w-[5%] text-center">{idx + 1}</td>
                       <td className="px-3 py-2 border border-black text-xs text-black w-[45%]">{item.itemname}</td>
                       <td className="px-3 py-2 border border-black text-xs text-black text-center w-[5%]">{item.unit}</td>
                       <td className="px-3 py-2 border border-black text-xs text-black w-[5%] text-center">{item.qty}</td>
-                      <td className="px-3 py-2 border border-black capitalize text-xs text-black w-[10%] text-center">{item.status}</td>
+                      {/* <td className="px-3 py-2 border border-black capitalize text-xs text-black w-[10%] text-center">{item.status}</td> */}
                       <td className="px-3 py-2 border border-black text-xs text-black w-[30%]">{item.remarks}</td>
                     </tr>
                   ))
@@ -549,9 +700,9 @@ useEffect(() => {
             <span className="font-bold text-black text-xs mb-1">ACCEPTED BY:</span>
             <span className="font-bold text-black mb-2 text-xs">{!reportData.tenant || reportData.tenant.trim().toUpperCase() === "N/A" ? "Branch" : reportData.tenant}</span>
             <div className="border-2 border-black rounded-lg bg-white flex items-center justify-center w-40 h-16 mb-2">
-              {reportData && reportData.tenantSignature ? (
+              {reportData && reportData.tenantsignature ? (
                 <img
-                  src={reportData.tenantSignature}
+                  src={reportData.tenantsignature}
                   alt="Tenant Signature"
                   className="h-12 object-contain"
                   style={{ filter: 'none' }}
@@ -566,9 +717,9 @@ useEffect(() => {
             <span className="font-bold text-black text-xs mb-1">PREPARED BY:</span>
             <span className="font-bold text-black mb-2 text-xs">{fromHistory ? reportData.technician : (username || 'Technician')}</span>
             <div className="border-2 border-black rounded-lg bg-white flex items-center justify-center w-40 h-16 mb-2">
-              {reportData && reportData.technicianSignature ? (
+              {reportData && reportData.techniciansignature ? (
                 <img
-                  src={reportData.technicianSignature}
+                  src={reportData.techniciansignature}
                   alt="Technician Signature"
                   className="h-12 object-contain"
                   style={{ filter: 'none' }}
@@ -593,7 +744,14 @@ useEffect(() => {
         </button>
        <button
             type="button"
-            onClick={onNewChecklist}
+              onClick={() => {
+    if (onBack) {
+      onBack(); // Go back to complaint report table
+    } else {
+      // fallback: navigate(-1)
+      navigate(-1);
+    }
+  }}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-green-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-blue-700 dark:border-gray-600 transition-colors"
           >
             {/* ...back icon... */}
@@ -602,7 +760,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={handleSendEmail}
-          disabled={isSending}
+          disabled={isSending || disableActions}
           className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-green-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-green-700 dark:border-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSending ? (
@@ -618,12 +776,30 @@ useEffect(() => {
         <button
           type="button"
           onClick={handleGenerateEstimationCost}
-          disabled={hasActiveEstimation || checkingEstimation}
+          disabled={hasActiveEstimation || checkingEstimation || disableActions}
           className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-green-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-green-700 dark:border-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-gray-700"
           title={hasActiveEstimation ? 'This checklist already has an active estimation cost' : ''}
         >
           {checkingEstimation ? 'Checking...' : 'Generate Estimation Cost'}
         </button>
+        <button
+  type="button"
+  onClick={() => {
+    navigate('/&Complaint Register', {
+      state: {
+        complaint: reportData,
+        fromDetailedView: true,
+        viewType: 'assign',
+        returnTo: 'detailed'
+      }
+    });
+  }}
+ disabled={!isApprovedEstimation || disableActions}
+  className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-blue-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-blue-700 dark:border-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  title={!isApprovedEstimation ? 'Estimation must be approved before assigning' : ''}
+>
+  Go to Assign
+</button>
       </div>
     </>
   );

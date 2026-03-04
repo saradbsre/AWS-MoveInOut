@@ -1,0 +1,10 @@
+@media print {
+  @page {
+    margin: 25mm 20mm 25mm 20mm; /* top right bottom left */
+  }
+  .print-container {
+    margin: 0 !important; /* Remove extra margin for print, use @page margin */
+    box-shadow: none !important;
+    background: white !important;
+  }
+}
