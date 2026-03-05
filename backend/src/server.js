@@ -419,6 +419,8 @@ app.get('/api/checklistshistory', async (req, res) => {
       filterUnit,
       filterTechnician,
       filterContractNo,
+      isTechnician,
+      filterTechnicianName,
       orderBy = 'desc'
     } = req.query;
 
@@ -432,7 +434,10 @@ app.get('/api/checklistshistory', async (req, res) => {
     if (filterUnit) where += ` AND unit_desc LIKE @filterUnit`;
     if (filterTechnician) where += ` AND userid LIKE @filterTechnician`;
     if (filterContractNo) where += ` AND contract_id LIKE @filterContractNo`;
-
+    if (isTechnician){
+      if (filterTechnicianName) where += ` AND userid = @filterTechnicianName`;
+    }
+    
     const query = `
       SELECT t.sysdate, visitType, refNum, CTenantName, t.build_id, b.build_desc, unit_desc, contract_id, contract_sdate, contract_edate,
       t.userid
@@ -479,7 +484,10 @@ app.get('/api/checklistshistory', async (req, res) => {
       dataReq.input('filterTechnician', sql.NVarChar, `%${filterTechnician}%`);
       countReq.input('filterTechnician', sql.NVarChar, `%${filterTechnician}%`);
     }
-
+    if (isTechnician && filterTechnicianName) {
+      dataReq.input('filterTechnicianName', sql.NVarChar, filterTechnicianName);
+      countReq.input('filterTechnicianName', sql.NVarChar, filterTechnicianName);
+    }
     dataReq.input('offset', sql.Int, offset);
     dataReq.input('pageSize', sql.Int, pageSizeNum);
 
@@ -529,6 +537,8 @@ app.get('/api/checklistshistory-all', async (req, res) => {
       filterUnit,
       filterTechnician,
       filterContractNo,
+      isTechnician,
+      filterTechnicianName,
       orderBy = 'desc'
     } = req.query;
 
@@ -538,7 +548,7 @@ app.get('/api/checklistshistory-all', async (req, res) => {
     if (filterUnit) where += ` AND unit_desc LIKE @filterUnit`;
     if (filterTechnician) where += ` AND userid LIKE @filterTechnician`;
     if (filterContractNo) where += ` AND contract_id LIKE @filterContractNo`;
-
+    if (isTechnician && filterTechnicianName) where += ` AND userid = @filterTechnicianName`;
     const query = `
       SELECT *
       FROM (
@@ -557,7 +567,7 @@ app.get('/api/checklistshistory-all', async (req, res) => {
     if (filterUnit) request.input('filterUnit', sql.NVarChar, `%${filterUnit}%`);
     if (filterTechnician) request.input('filterTechnician', sql.NVarChar, `%${filterTechnician}%`);
     if (filterContractNo) request.input('filterContractNo', sql.NVarChar, `%${filterContractNo}%`);
-
+    if (isTechnician && filterTechnicianName) request.input('filterTechnicianName', sql.NVarChar, filterTechnicianName);  
     const result = await request.query(query);
     const checklists = result.recordset || [];
 

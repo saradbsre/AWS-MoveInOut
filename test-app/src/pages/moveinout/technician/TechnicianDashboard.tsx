@@ -79,7 +79,7 @@ export default function TechnicianDashboard() {
   useEffect(() => {
     const fetchChecklists = async () => {
       setLoading(true);
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory`;
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory-all`;
       const response = await fetch(apiUrl);
       const data = await response.json();
       setChecklists(
