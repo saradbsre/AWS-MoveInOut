@@ -161,7 +161,7 @@ exports.login = async (req, res) => {
 
 // Add session validation endpoint
 exports.validateSession = async (req, res) => {
-  if (req.session.user) {
+  if (req.session.user && req.session.companyConfig) {
     // No need to check is_logged_in anymore
     // If the session exists, it's valid (express-session handles expiration)
     res.json({
