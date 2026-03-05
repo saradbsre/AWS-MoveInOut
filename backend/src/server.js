@@ -40,7 +40,7 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://portal.abdulwahedbinshabibproperty.com', 'https://portal.bsre.abdulwahedbinshabibproperty.com', 
+    ? ['https://portal.bsre.abdulwahedbinshabibproperty.com', 'https://portal.saeed.abdulwahedbinshabibproperty.com',
       'https://portal.hamda.abdulwahedbinshabibproperty.com', 'https://aws-moveinout.onrender.com']
     : true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
