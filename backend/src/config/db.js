@@ -35,28 +35,32 @@ const userPools = new Map(); // key: server|database|user
 function parseConnectionString(connString) {
   const parts = {};
   connString.split(';').forEach(part => {
-    const [key, value] = part.split('=').map(s => s.trim());
-    if (key && value) {
-      parts[key.toLowerCase().replace(/\s+/g, '')] = value;
-    }
+    const idx = part.indexOf('=');
+    if (idx === -1) return;
+    const key = part.slice(0, idx).trim().toLowerCase().replace(/\s+/g, '');
+    const value = part.slice(idx + 1).trim();
+    if (key && value) parts[key] = value;
   });
 
+  const dataSource = parts['datasource'] || parts['server'] || '';
+  const [serverHost, serverPort] = dataSource.split(',');
+
   return {
-    server: parts['datasource'] || parts['server'],
+    server: (serverHost || '').trim(),
+    port: serverPort ? parseInt(serverPort.trim(), 10) : 1433,
     database: parts['initialcatalog'] || parts['database'],
-    user: parts['uid'] || parts['user'],
+    user: parts['uid'] || parts['user'] || parts['userid'],
     password: parts['pwd'] || parts['password']
   };
 }
 
 async function connectUser(connString) {
   const conn = parseConnectionString(connString);
-  const key = `${conn.server}|${conn.database}|${conn.user}`;
+  const key = `${conn.server}|${conn.port}|${conn.database}|${conn.user}`;
 
   if (userPools.has(key)) {
     const existingPool = userPools.get(key);
     if (existingPool.connected) return existingPool;
-    // Remove stale pool
     userPools.delete(key);
   }
 
@@ -64,6 +68,7 @@ async function connectUser(connString) {
     user: conn.user,
     password: conn.password,
     server: conn.server,
+    port: conn.port, // IMPORTANT
     database: conn.database,
     options: { encrypt: false, trustServerCertificate: true, enableArithAbort: true },
     pool: { max: 20, min: 2, idleTimeoutMillis: 60000 }
