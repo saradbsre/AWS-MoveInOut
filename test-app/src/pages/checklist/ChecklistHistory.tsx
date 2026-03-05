@@ -36,26 +36,26 @@ export default function TechnicianDashboard() {
   const username = sessionStorage.getItem('username') || '';
   const roleid = sessionStorage.getItem('role');
   const [barFilter, setBarFilter] = useState('weekly');
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const isTechnician = sessionStorage.getItem('role') === 'TECHNICIAN';
 
   // Fetch checklists
   useEffect(() => {
     const fetchChecklists = async () => {
       setLoading(true);
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory`;
-      const response = await fetch(apiUrl, { credentials: 'include' });
+      const params = new URLSearchParams();
+      if (isTechnician && username) {
+        params.append('isTechnician', 'true');
+        params.append('filterTechnicianName', username);
+      }
+      const response = await fetch(`${apiUrl}/api/checklistshistory-all?${params.toString()}`, 
+        { credentials: 'include' });
       const data = await response.json();
-      setChecklists(
-        data.checklists.filter(
-          (item: Checklist) =>
-            roleid === 'TECHNICIAN'
-              ? item.technician?.trim().toLowerCase() === username.trim().toLowerCase()
-              : true
-        )
-      );
+      setChecklists(data.checklists);
       setLoading(false);
     };
     fetchChecklists();
-  }, [username, roleid]);
+  }, [apiUrl, isTechnician, username]);
 
   // Fetch complaints (for pending complaints)
   useEffect(() => {
@@ -121,26 +121,6 @@ export default function TechnicianDashboard() {
 
   const barData = getBarData();
 
-  useEffect(() => {
-    const fetchChecklists = async () => {
-      setLoading(true);
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory`;
-      const response = await fetch(apiUrl, {credentials: 'include'});
-      const data = await response.json();
-      setChecklists(
-        data.checklists.filter(
-          (item: Checklist) =>
-            roleid === 'TECHNICIAN'
-              ? item.technician?.trim().toLowerCase() === username.trim().toLowerCase()
-              : true
-        )
-      );
-      setLoading(false);
-    };
-    fetchChecklists();
-  }, [username, roleid]);
-
- 
 const technicianBarData: any[] = [];
 const technicianMap: { [key: string]: { moveIn: number; moveOut: number } } = {};
 

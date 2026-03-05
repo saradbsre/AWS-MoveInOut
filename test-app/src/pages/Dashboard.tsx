@@ -32,7 +32,7 @@ export default function Dashboard() {
         }}
       >
         {rawRole === 'System Administrator' && <ChecklistHistory />}
-        {rawRole === 'TECHNICIAN' && <TechnicianDashboard />}
+        {rawRole === 'TECHNICIAN' && <ChecklistHistory />}
       </div>
     </div>
   );

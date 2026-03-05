@@ -52,7 +52,8 @@ export default function TenantReport() {
   const itemsPerPage = 25;
   const [sortColumn, setSortColumn] = useState<string>('submissionDate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const isTechnician = sessionStorage.getItem('role') === 'TECHNICIAN';
   // function createPageFooter(): void {
   //   // Remove any existing footer elements and styles
   //   const existingFooters = document.querySelectorAll('.dynamic-page-footer');
@@ -127,9 +128,15 @@ export default function TenantReport() {
       if (filterUnit) params.append('filterUnit', filterUnit);
       if (filterTechnician) params.append('filterTechnician', filterTechnician);
       if (filterContractNo) params.append('filterContractNo', filterContractNo);
+      if (isTechnician) {
+        const username = sessionStorage.getItem('username') || '';
+        params.append('isTechnician', 'true');
+        params.append('filterTechnicianName', username);
+      }
+      
 
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory?${params.toString()}`;
-      const response = await fetch(apiUrl, { credentials: 'include' });
+      const response = await fetch(`${apiUrl}/api/checklistshistory?${params.toString()}`, 
+        { credentials: 'include' });
       const data = await response.json();
 
       setChecklists(

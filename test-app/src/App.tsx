@@ -64,7 +64,7 @@ function App() {
                 (() => {
                   const roleid = sessionStorage.getItem('role')
                   // console.log('App roleid:', roleid);
-                  if (roleid === 'TECHNICIAN') return <TenantStatusReport />;
+                  if (roleid === 'TECHNICIAN') return <ChecklistReport />;
                   if (roleid === 'System Administrator') return <ChecklistReport />;
                   return <NotFound />;
                 })()

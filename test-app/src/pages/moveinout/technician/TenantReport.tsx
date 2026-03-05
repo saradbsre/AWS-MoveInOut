@@ -120,6 +120,7 @@ export default function TenantReport() {
       const apiUrl = `${import.meta.env.VITE_API_URL}/api/checklistshistory`;
       const response = await fetch(apiUrl);
       const data = await response.json();
+      
       setChecklists(
         data.checklists.map((item: Omit<ChecklistItem, 'equipment'> & { equipment: string }) => ({
           ...item,
