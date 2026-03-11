@@ -585,8 +585,9 @@ const renderSignatureView = (signatureType: 'tenant' | 'technician') => {
             } else {
               handleNext(); // Use handleNext for tenant signature (with validation)
             }
-          }}
+          }} 
           className="flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-green-700 text-black font-medium rounded-lg border border-grey-300 dark:text-white dark:bg-gray-700 dark:hover:bg-green-700 dark:border-gray-600 transition-colors"
+          disabled={loading}
           >
           {signatureType === 'tenant' ? (
             <>
@@ -597,7 +598,7 @@ const renderSignatureView = (signatureType: 'tenant' | 'technician') => {
             </>
           ) : (
             <>
-              Submit
+              {loading ? 'Submitting...' : 'Submit'}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
