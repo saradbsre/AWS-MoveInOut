@@ -89,7 +89,7 @@ class AuthModel {
                     m.module,
                     m.mdefault
                 FROM dbo.role2 r
-                LEFT JOIN dbo.module m ON r.type = m.type
+                LEFT JOIN dbo.module m ON r.type = m.type and r.App_Id = m.App_ID
                 WHERE r.roleid = @roleid 
                 AND r.access = 'YES'
             `);
