@@ -151,74 +151,35 @@ exports.insertchecklist = async (req, res) => {
     
     // Insert checklist document (without files yet)
     let counter = 0;
-if (equipmentArray && equipmentArray.length > 0) {
-
-  for (const eq of equipmentArray) {
-    counter += 1;
-
-    const checklistDoc = {
-      contract_id: contract,
-      visitType,
-      barcode,
-      tenantsignature,
-      techniciansignature,
-      created_at: new Date(date),
-      userid: username,
-      tenantCode,
-      tenantName,
-      build_id: building,
-      unit_desc: unit,
-      startDate,
-      endDate,
-      refNum,
-
-      itemno: eq.itemno,
-      itemname: eq.itemname,
-      brdcode: eq.brdcode,
-      subcode: eq.subcode,
-      unit: eq.unit,
-      qty: eq.qty,
-      status: eq.status,
-      remarks: eq.remarks,
-
-      counter,
-      subComp_id
-    };
-
-    await ContractModel.InsertChecklist(checklistDoc, req.session.companyConfig);
-  }
-
-} else {
-
-  //INSERT ONE RECORD EVEN IF NO EQUIPMENT IS SELECTED
-  const checklistDoc = {
-    contract_id: contract,
-    visitType,
-    barcode,
-    tenantsignature,
-    techniciansignature,
-    created_at: new Date(date),
-    userid: username,
-    tenantCode,
-    tenantName,
-    build_id: building,
-    unit_desc: unit,
-    startDate,
-    endDate,
-    refNum,
-
-    itemno: null,
-    itemname: null,
-    brdcode: null,
-    subcode: null,
-    unit: null,
-    qty: null,
-    status: null,
-    remarks: null,
-
-    counter: 1,
-    subComp_id
-  };
+    for (const eq of equipmentArray) {
+      counter += 1;
+      const checklistDoc = {
+        contract_id: contract,
+        visitType,
+        barcode,
+        tenantsignature,
+        techniciansignature,
+        created_at: new Date(date),
+        userid: username,
+        tenantCode,
+        tenantName,
+        build_id: building,
+        unit_desc: unit,
+        startDate,
+        endDate,
+        refNum,
+        // Equipment fields
+        itemno: eq.itemno,
+        itemname: eq.itemname,
+        brdcode: eq.brdcode,
+        subcode: eq.subcode,
+        unit: eq.unit,
+        qty: eq.qty,
+        status: eq.status,
+        remarks: eq.remarks,
+        counter: counter,
+        subComp_id: subComp_id
+      };
 
      await ContractModel.InsertChecklist(checklistDoc, req.session.companyConfig);
     }
