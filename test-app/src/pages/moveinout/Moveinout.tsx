@@ -121,6 +121,10 @@ export default function Moveinout(){
         errors.push('Unit is required');
       }
 
+      if (selectedEquipment.length === 0) {
+        errors.push('Equipment is required');
+      }
+
       if (errors.length > 0) {
         setValidationErrors(errors);
         setShowValidationPopup(true);
@@ -169,6 +173,7 @@ export default function Moveinout(){
 
   const handleSubmit = async () => {
     const errors: string[] = [];
+
       if (technicianSigRef.current && technicianSigRef.current.isEmpty()) {
         errors.push('Technician signature is required');
       }
@@ -905,7 +910,7 @@ const renderFormView = () => {
           title="Required Fields Missing"
           message="Please complete the following before proceeding:"
           confirmButtonText="OK"
-          confirmButtonColor="green"
+          confirmButtonColor="red"
         />
         <ImageModal
           isOpen={showImageModal}
@@ -924,7 +929,20 @@ const renderFormView = () => {
       </>
     );
   } else if (currentView === 'tenantSignature') {
-    return renderSignatureView('tenant');
+  return (
+    <>
+      <ValidationPopup
+        isOpen={showValidationPopup}
+        onClose={() => setShowValidationPopup(false)}
+        errors={validationErrors}
+        title="Required Fields Missing"
+        message="Please complete the following before proceeding:"
+        confirmButtonText="OK"
+        confirmButtonColor="red"
+      />
+      {renderSignatureView('tenant')}
+    </>
+  );
   } else if (currentView === 'technicianSignature') {
     return renderSignatureView('technician');
   } else if (currentView === 'report') {
