@@ -27,10 +27,10 @@ router.post('/insertchecklist', upload.fields([
   { name: 'images' },
   { name: 'videos' }
 ]), insertchecklist);
-router.post('/insertcomplaint', upload.fields([
-  { name: 'images' },
-  { name: 'videos' }
-]), insertComplaint);
+// router.post('/insertcomplaint', upload.fields([
+//   { name: 'images' },
+//   { name: 'videos' }
+// ]), insertComplaint);
 // router.get('/getcomplaints', GetComplaints);
 // router.post('/insertcomplaintdetails', insertcomplaintdetails);
 // router.get('/getcomplaintdetails', GetComplaintDetails);
