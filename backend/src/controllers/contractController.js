@@ -203,269 +203,269 @@ exports.insertchecklist = async (req, res) => {
   }
 };
 
-exports.insertComplaint = async (req, res) => {
-  try {
-    const {
-      complaint_id,
-      complaintNum,
-      complaintType,
-      build_id,
-      build_desc,
-      unit_desc,
-      block,
-      floor,
-      accessArea,
-      both,
-      CTenantName,
-      contract_id,
-      contract_sdate,
-      contract_edate,
-      type,
-      description,
-      status,
-      auditrev,
-      userid,
-      Date,
-      assigned,
-      preparedBy,
-      authLevel,
-      authStatus
-    } = req.body;
+// exports.insertComplaint = async (req, res) => {
+//   try {
+//     const {
+//       complaint_id,
+//       complaintNum,
+//       complaintType,
+//       build_id,
+//       build_desc,
+//       unit_desc,
+//       block,
+//       floor,
+//       accessArea,
+//       both,
+//       CTenantName,
+//       contract_id,
+//       contract_sdate,
+//       contract_edate,
+//       type,
+//       description,
+//       status,
+//       auditrev,
+//       userid,
+//       Date,
+//       assigned,
+//       preparedBy,
+//       authLevel,
+//       authStatus
+//     } = req.body;
 
-    //console.log("Received complaint data:", req.body);
+//     //console.log("Received complaint data:", req.body);
 
-    await ContractModel.InsertComplaint({
-      complaint_id,
-      complaintNum,
-      complaintType,
-      build_id,
-      build_desc,
-      unit_desc,
-      block,
-      floor,
-      accessArea,
-      both,
-      CTenantName,
-      contract_id,
-      contract_sdate,
-      contract_edate,
-      type,
-      description,
-      status,
-      auditrev,
-      userid,
-      Date,
-      assigned,
-      preparedBy,
-      authLevel,
-      authStatus
-    }, req.session.companyConfig);
+//     await ContractModel.InsertComplaint({
+//       complaint_id,
+//       complaintNum,
+//       complaintType,
+//       build_id,
+//       build_desc,
+//       unit_desc,
+//       block,
+//       floor,
+//       accessArea,
+//       both,
+//       CTenantName,
+//       contract_id,
+//       contract_sdate,
+//       contract_edate,
+//       type,
+//       description,
+//       status,
+//       auditrev,
+//       userid,
+//       Date,
+//       assigned,
+//       preparedBy,
+//       authLevel,
+//       authStatus
+//     }, req.session.companyConfig);
 
-    if (req.files && req.files.images) {
-      for (const file of req.files.images) {
-        const compressed = await compressImage(file);
-        await ContractModel.InsertComplaintImages(
-          build_id,
-          complaintNum,
-          compressed.buffer,
-          compressed.mimetype,
-          req.session.companyConfig
-        );
-      }
-    }
+//     if (req.files && req.files.images) {
+//       for (const file of req.files.images) {
+//         const compressed = await compressImage(file);
+//         await ContractModel.InsertComplaintImages(
+//           build_id,
+//           complaintNum,
+//           compressed.buffer,
+//           compressed.mimetype,
+//           req.session.companyConfig
+//         );
+//       }
+//     }
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
-exports.insertcomplaintdetails = async (req, res) => {
-  try {
-    const {
-      complaint_id,
-      complaintNum,
-      build_id,
-      build_desc,
-      unit_desc,
-      both,
-      CTenantName,
-      contract_id,
-      status,
-      assigned_to,
-      assigned_by,
-      assigned_date,
-      category,
-      remarks,
-      auditrev,
-      userid,
-      Date,
-      itemname,
-      itemno,
-      qty,
-      barcode,
-      counter,
-      tenantsignature,
-      techniciansignature,
-      brdcode,
-      subcode,
-      unit,
-      contract_sdate,
-      contract_edate
+// exports.insertcomplaintdetails = async (req, res) => {
+//   try {
+//     const {
+//       complaint_id,
+//       complaintNum,
+//       build_id,
+//       build_desc,
+//       unit_desc,
+//       both,
+//       CTenantName,
+//       contract_id,
+//       status,
+//       assigned_to,
+//       assigned_by,
+//       assigned_date,
+//       category,
+//       remarks,
+//       auditrev,
+//       userid,
+//       Date,
+//       itemname,
+//       itemno,
+//       qty,
+//       barcode,
+//       counter,
+//       tenantsignature,
+//       techniciansignature,
+//       brdcode,
+//       subcode,
+//       unit,
+//       contract_sdate,
+//       contract_edate
 
-    } = req.body;
-    //console.log("Received complaint details data:", req.body);
-    await ContractModel.InsertComplaintDetails({
-      complaint_id,
-      complaintNum,
-      build_id,
-      build_desc,
-      unit_desc,
-      both,
-      CTenantname: CTenantName,
-      contract_id,
-      status,
-      assigned_to,
-      assigned_by,
-      assigned_date,
-      category,
-      remarks,
-      auditrev,
-      userid,
-      Date,
-      itemname,
-      itemno,
-      qty,
-      barcode,
-      counter,
-      tenantsignature,
-      techniciansignature,
-      brdcode,
-      subcode,
-      unit,
-      contract_sdate,
-      contract_edate
+//     } = req.body;
+//     //console.log("Received complaint details data:", req.body);
+//     await ContractModel.InsertComplaintDetails({
+//       complaint_id,
+//       complaintNum,
+//       build_id,
+//       build_desc,
+//       unit_desc,
+//       both,
+//       CTenantname: CTenantName,
+//       contract_id,
+//       status,
+//       assigned_to,
+//       assigned_by,
+//       assigned_date,
+//       category,
+//       remarks,
+//       auditrev,
+//       userid,
+//       Date,
+//       itemname,
+//       itemno,
+//       qty,
+//       barcode,
+//       counter,
+//       tenantsignature,
+//       techniciansignature,
+//       brdcode,
+//       subcode,
+//       unit,
+//       contract_sdate,
+//       contract_edate
 
-    }, req.session.companyConfig);
+//     }, req.session.companyConfig);
     
-    res.json({ success: true });
+//     res.json({ success: true });
 
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
 
-exports.GetComplaints = async (req, res) => {
-  try {
-    const complaints = await ContractModel.GetComplaints(req.session.companyConfig);
-    res.json({ success: true, complaints });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.GetComplaints = async (req, res) => {
+//   try {
+//     const complaints = await ContractModel.GetComplaints(req.session.companyConfig);
+//     res.json({ success: true, complaints });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
-exports.GetComplaintDetails = async (req, res) => {
-  try {
-    //const { area_id, build_id } = req.query;
-    // Pass both area_id and build_id to the model (model will handle logic)
-    const complaintDetails = await ContractModel.GetComplaintDetails(
-      req.session.companyConfig
-    );
-    res.json({ success: true, complaintDetails });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.GetComplaintDetails = async (req, res) => {
+//   try {
+//     //const { area_id, build_id } = req.query;
+//     // Pass both area_id and build_id to the model (model will handle logic)
+//     const complaintDetails = await ContractModel.GetComplaintDetails(
+//       req.session.companyConfig
+//     );
+//     res.json({ success: true, complaintDetails });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
-exports.UpdateComplaintDetails = async (req, res) => {
-  try {
-    const {
-      complaint_id,
-      subComp_id,
-      status,
-      assigned_to,
-      assigned_by,
-      assigned_date,
-      auditrev
-    } = req.body;
+// exports.UpdateComplaintDetails = async (req, res) => {
+//   try {
+//     const {
+//       complaint_id,
+//       subComp_id,
+//       status,
+//       assigned_to,
+//       assigned_by,
+//       assigned_date,
+//       auditrev
+//     } = req.body;
 
-    await ContractModel.UpdateComplaintDetails({
-      complaint_id,
-      subComp_id,
-      status,
-      assigned_to,
-      assigned_by,
-      assigned_date,
-      auditrev
-    }, req.session.companyConfig);
+//     await ContractModel.UpdateComplaintDetails({
+//       complaint_id,
+//       subComp_id,
+//       status,
+//       assigned_to,
+//       assigned_by,
+//       assigned_date,
+//       auditrev
+//     }, req.session.companyConfig);
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
-exports.EditComplaint = async (req, res) => {
-  try {
-    const { complaint_id, description, block, floor, place, build_desc, unit_desc, status, approvedBy, authLevel, authStatus } = req.body;
-    await ContractModel.EditComplaint(
-      complaint_id,
-      description,
-      block,
-      floor,
-      place,
-      build_desc,
-      unit_desc,
-      status,
-      approvedBy,
-      authLevel,
-      authStatus,
-      req.session.companyConfig
-    );
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.EditComplaint = async (req, res) => {
+//   try {
+//     const { complaint_id, description, block, floor, place, build_desc, unit_desc, status, approvedBy, authLevel, authStatus } = req.body;
+//     await ContractModel.EditComplaint(
+//       complaint_id,
+//       description,
+//       block,
+//       floor,
+//       place,
+//       build_desc,
+//       unit_desc,
+//       status,
+//       approvedBy,
+//       authLevel,
+//       authStatus,
+//       req.session.companyConfig
+//     );
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
-exports.DeleteComplaint = async (req, res) => {
-  try {
-    const { complaint_id } = req.body;
-    await ContractModel.DeleteComplaint(complaint_id, req.session.companyConfig);
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.DeleteComplaint = async (req, res) => {
+//   try {
+//     const { complaint_id } = req.body;
+//     await ContractModel.DeleteComplaint(complaint_id, req.session.companyConfig);
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
-exports.DeleteComplaintDetails = async (req, res) => {
-  try {
-    const { complaint_id, subComp_id } = req.body;
-    await ContractModel.DeleteComplaintDetails(complaint_id, subComp_id, req.session.companyConfig);
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.DeleteComplaintDetails = async (req, res) => {
+//   try {
+//     const { complaint_id, subComp_id } = req.body;
+//     await ContractModel.DeleteComplaintDetails(complaint_id, subComp_id, req.session.companyConfig);
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
-exports.GetComplaintCategories = async (req, res) => {
-  try {
-    const categories = await ContractModel.GetComplaintCategories(req.session.companyConfig);
-    res.json({ success: true, categories });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.GetComplaintCategories = async (req, res) => {
+//   try {
+//     const categories = await ContractModel.GetComplaintCategories(req.session.companyConfig);
+//     res.json({ success: true, categories });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
 exports.GetCategoryItems = async (req, res) => {
   try {
@@ -547,25 +547,25 @@ exports.DeleteCatTech = async (req, res) => {
   }
 };
 
-exports.addComplaintCategory = async (req, res) => {
-  const { code, description } = req.body;
-  try {
-    await ContractModel.AddComplaintCategory(req.session.companyConfig, code, description);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
+// exports.addComplaintCategory = async (req, res) => {
+//   const { code, description } = req.body;
+//   try {
+//     await ContractModel.AddComplaintCategory(req.session.companyConfig, code, description);
+//     res.json({ success: true });
+//   } catch (err) {
+//     res.status(500).json({ success: false, error: err.message });
+//   }
+// };
 
-exports.deleteComplaintCategory = async (req, res) => {
-  const { code } = req.params;
-  try {
-    await ContractModel.DeleteComplaintCategory(req.session.companyConfig, code);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
+// exports.deleteComplaintCategory = async (req, res) => {
+//   const { code } = req.params;
+//   try {
+//     await ContractModel.DeleteComplaintCategory(req.session.companyConfig, code);
+//     res.json({ success: true });
+//   } catch (err) {
+//     res.status(500).json({ success: false, error: err.message });
+//   }
+// };
 
 exports.Area = async (req, res) => {
   try {
@@ -588,15 +588,15 @@ exports.GetMappedTechs = async (req, res) => {
   }
 };
 
-exports.GetComplaintTypes = async (req, res) => {
-  try {
-    const { complaintNum } = req.query;
-    const complaintTypes = await ContractModel.GetComplaintTypes(req.session.companyConfig, complaintNum);
-    res.json({ success: true, complaintTypes });
-  } catch (err) {
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.GetComplaintTypes = async (req, res) => {
+//   try {
+//     const { complaintNum } = req.query;
+//     const complaintTypes = await ContractModel.GetComplaintTypes(req.session.companyConfig, complaintNum);
+//     res.json({ success: true, complaintTypes });
+//   } catch (err) {
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
 exports.GetChecklist = async (req, res) => {
   try {
@@ -610,35 +610,35 @@ exports.GetChecklist = async (req, res) => {
   }
 };
 
-exports.insertAssignedComplaint = async (req, res) => {
-  try {
-    const data = req.body;
-   // console.log("Received data for assigned complaint:", data);
-    await ContractModel.InsertAssignedComplaint(data, req.session.companyConfig);
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.insertAssignedComplaint = async (req, res) => {
+//   try {
+//     const data = req.body;
+//    // console.log("Received data for assigned complaint:", data);
+//     await ContractModel.InsertAssignedComplaint(data, req.session.companyConfig);
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
-exports.getAssignedComplaints = async (req, res) => {
-  try {    const { userid } = req.query;
-    const complaints = await ContractModel.GetAssignedComplaints(userid,req.session.companyConfig);
-    res.json({ success: true, complaints });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.getAssignedComplaints = async (req, res) => {
+//   try {    const { userid } = req.query;
+//     const complaints = await ContractModel.GetAssignedComplaints(userid,req.session.companyConfig);
+//     res.json({ success: true, complaints });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };
 
-exports.CloseComplaint = async (req, res) => {
-  try {
-    const { complaint_id } = req.body;
-    await ContractModel.CloseComplaint(complaint_id, req.session.companyConfig);
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.json({ success: false, error: err.message });
-  }
-};
+// exports.CloseComplaint = async (req, res) => {
+//   try {
+//     const { complaint_id } = req.body;
+//     await ContractModel.CloseComplaint(complaint_id, req.session.companyConfig);
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ success: false, error: err.message });
+//   }
+// };

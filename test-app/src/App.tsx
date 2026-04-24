@@ -89,15 +89,15 @@ function App() {
         {/* Un Protected Routes */}
         <Route path="UserCreation" element={<UserCreation />} />
         <Route path="ChecklistHistory" element={<ChecklistHistory />} />
-        <Route path="&Tenant Master Maintenance" element={<ComplaintForm />} />
+        {/* <Route path="&Tenant Master Maintenance" element={<ComplaintForm />} /> */}
         {/* <Route path="EstimationCost" element={<EstimationCost />} /> */}
         <Route path="EstimationCostReport" element={<EstimationReport />} />
         <Route path="EstimationCostReportView/:srno" element={<EstimationCostReportView />} />
-        <Route path="&Complaint Register" element={<ComplaintForm />} />
+        {/* <Route path="&Complaint Register" element={<ComplaintForm />} /> */}
         {/* <Route path="&Tenant Master Maintenance" element={<ComplaintReport />} /> */}
         {/* <Route path="Pending Complaints Register" element={<BranchComplaintReport />} /> */}
         <Route path="Move &Out Register" element={<MoveInOutReqForm/>} />
-        <Route
+        {/* <Route
           path="Pending Complaints Register"
           element={
             <ProtectedModule modulePath="Pending Complaints Register">
@@ -114,9 +114,9 @@ function App() {
               }
             </ProtectedModule>
           }
-        />
-        <Route path="Complaint Category" element={<CatTechMaintenance />} />
-        <Route path="&Complaint Register" element={<ComplaintChecklist />} />
+        /> */}
+        {/* <Route path="Complaint Category" element={<CatTechMaintenance />} />
+        <Route path="&Complaint Register" element={<ComplaintChecklist />} /> */}
         <Route path="CheckListView" element={<CheckListViewWrapper />} />
         {/* Catch-all route for 404 Not Found */}
         <Route path="*" element={<NotFound />} />
