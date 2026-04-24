@@ -716,106 +716,106 @@ app.get('/api/tenant-details/:username', async (req, res) => {
   }
 });
 
-app.post('/api/complaints',
-  upload.fields([
-    { name: 'images', maxCount: 10 },
-    { name: 'videos', maxCount: 10 }
-  ]),
-  async (req, res) => {
-    try {
-      const db = await connect();
+// app.post('/api/complaints',
+//   upload.fields([
+//     { name: 'images', maxCount: 10 },
+//     { name: 'videos', maxCount: 10 }
+//   ]),
+//   async (req, res) => {
+//     try {
+//       const db = await connect();
 
-      // console.log('Received body:', req.body);
+//       // console.log('Received body:', req.body);
 
-      // Robust equipment parsing
-      let equipment = [];
-      if (typeof req.body.equipment === 'string') {
-        try {
-          equipment = JSON.parse(req.body.equipment);
-        } catch {
-          equipment = [];
-        }
-      } else if (Array.isArray(req.body.equipment)) {
-        equipment = req.body.equipment;
-      }
+//       // Robust equipment parsing
+//       let equipment = [];
+//       if (typeof req.body.equipment === 'string') {
+//         try {
+//           equipment = JSON.parse(req.body.equipment);
+//         } catch {
+//           equipment = [];
+//         }
+//       } else if (Array.isArray(req.body.equipment)) {
+//         equipment = req.body.equipment;
+//       }
 
-      // Prepare complaint document (without files yet)
-      const complaintDoc = {
-        building: req.body.building,
-        unit: req.body.unit,
-        tenant: req.body.tenant,
-        contractNo: req.body.contractNo,
-        startDate: req.body.startDate && !isNaN(Date.parse(req.body.startDate)) ? new Date(req.body.startDate) : null,
-        endDate: req.body.endDate && !isNaN(Date.parse(req.body.endDate)) ? new Date(req.body.endDate) : null,
-        submissionDate: req.body.submissionDate && !isNaN(Date.parse(req.body.submissionDate))
-          ? new Date(req.body.submissionDate)
-          : new Date(),
-        description: req.body.description,
-        username: req.body.username,
-        status: req.body.status || 'pending',
-        equipment,
-        both: req.body.both,
-        build_id: req.body.build_id,
-        unit_desc: req.body.unit_desc,
-        referenceNumber: req.body.referenceNumber || '',
-        createdAt: new Date(),
-        // files: []
-      };
+//       // Prepare complaint document (without files yet)
+//       const complaintDoc = {
+//         building: req.body.building,
+//         unit: req.body.unit,
+//         tenant: req.body.tenant,
+//         contractNo: req.body.contractNo,
+//         startDate: req.body.startDate && !isNaN(Date.parse(req.body.startDate)) ? new Date(req.body.startDate) : null,
+//         endDate: req.body.endDate && !isNaN(Date.parse(req.body.endDate)) ? new Date(req.body.endDate) : null,
+//         submissionDate: req.body.submissionDate && !isNaN(Date.parse(req.body.submissionDate))
+//           ? new Date(req.body.submissionDate)
+//           : new Date(),
+//         description: req.body.description,
+//         username: req.body.username,
+//         status: req.body.status || 'pending',
+//         equipment,
+//         both: req.body.both,
+//         build_id: req.body.build_id,
+//         unit_desc: req.body.unit_desc,
+//         referenceNumber: req.body.referenceNumber || '',
+//         createdAt: new Date(),
+//         // files: []
+//       };
 
-      const result = await db.collection('dbo.complaints').insertOne(complaintDoc);
-      const complaintId = result.insertedId;
+//       const result = await db.collection('dbo.complaints').insertOne(complaintDoc);
+//       const complaintId = result.insertedId;
 
-      // Setup GridFS bucket
-      const bucket = new GridFSBucket(db, { bucketName: 'checklist_files' });
+//       // Setup GridFS bucket
+//       const bucket = new GridFSBucket(db, { bucketName: 'checklist_files' });
 
-     // ...inside your /api/complaints endpoint...
-      const files = [
-        ...((req.files && req.files.images) ? req.files.images.map(f => ({ ...f, type: 'image' })) : []),
-        ...((req.files && req.files.videos) ? req.files.videos.map(f => ({ ...f, type: 'video' })) : [])
-      ];
+//      // ...inside your /api/complaints endpoint...
+//       const files = [
+//         ...((req.files && req.files.images) ? req.files.images.map(f => ({ ...f, type: 'image' })) : []),
+//         ...((req.files && req.files.videos) ? req.files.videos.map(f => ({ ...f, type: 'video' })) : [])
+//       ];
 
-      for (const file of files) {
-        // console.log(`Uploading file: ${file.originalname}, type: ${file.type}, size: ${file.size} bytes`);
-        const uploadStream = bucket.openUploadStream(file.originalname, {
-          contentType: file.mimetype,
-          metadata: {
-            complaint_id: complaintId,
-            type: file.type
-          }
-        });
+//       for (const file of files) {
+//         // console.log(`Uploading file: ${file.originalname}, type: ${file.type}, size: ${file.size} bytes`);
+//         const uploadStream = bucket.openUploadStream(file.originalname, {
+//           contentType: file.mimetype,
+//           metadata: {
+//             complaint_id: complaintId,
+//             type: file.type
+//           }
+//         });
 
-        uploadStream.end(file.buffer);
+//         uploadStream.end(file.buffer);
 
-        // Wait for the upload to finish before continuing
-        await new Promise((resolve, reject) => {
-         uploadStream.on('finish', async () => {
-  // console.log(`Saved to GridFS: ${uploadStream.id}`); // Only _id is available here
-  await db.collection('dbo.complaints').updateOne(
-    { _id: complaintId },
-    {
-      $push: {
-        files: {
-          file_id: uploadStream.id,
-          file_name: file.originalname,
-          file_type: file.type,
-          mime_type: file.mimetype
-        }
-      }
-    }
-  );
-  resolve();
-});
-          uploadStream.on('error', reject);
-        });
-      }
+//         // Wait for the upload to finish before continuing
+//         await new Promise((resolve, reject) => {
+//          uploadStream.on('finish', async () => {
+//   // console.log(`Saved to GridFS: ${uploadStream.id}`); // Only _id is available here
+//   await db.collection('dbo.complaints').updateOne(
+//     { _id: complaintId },
+//     {
+//       $push: {
+//         files: {
+//           file_id: uploadStream.id,
+//           file_name: file.originalname,
+//           file_type: file.type,
+//           mime_type: file.mimetype
+//         }
+//       }
+//     }
+//   );
+//   resolve();
+// });
+//           uploadStream.on('error', reject);
+//         });
+//       }
 
-      res.json({ success: true, id: complaintId });
-    } catch (err) {
-      console.error('Error saving complaint:', err);
-      res.status(500).json({ success: false, message: 'Failed to save complaint', error: err.message });
-    }
-  }
-);
+//       res.json({ success: true, id: complaintId });
+//     } catch (err) {
+//       console.error('Error saving complaint:', err);
+//       res.status(500).json({ success: false, message: 'Failed to save complaint', error: err.message });
+//     }
+//   }
+// );
 
 app.get('/api/complaints', async (req, res) => {
   try {
