@@ -138,7 +138,7 @@ class ContractModel {
         const result = await db.request()
             .query(`
                 SELECT grpcode, sscode, brdcode, subcode, itemno, itemname, majunit
-                FROM dbo.citem
+                FROM dbo.citem WHERE onlineItem = 1
             `);
         return result.recordset;
     }
