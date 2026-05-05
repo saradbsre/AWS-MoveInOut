@@ -8,19 +8,19 @@ import ChecklistHistory from '@/pages/checklist/ChecklistHistory';
 import { DisableDevTools } from './hooks/DisableDevTools';
 import RequireAuth from '@/components/auth';
 import ProtectedModule from '@/components/ProtectedModule';
-import TenantStatusReport from '@/pages/moveinout/technician/TenantReport';
+// import TenantStatusReport from '@/pages/moveinout/technician/TenantReport';
 import ChecklistReport from '@/pages/checklist/ChecklistReport';
 import EstimationCost from '@/pages/maintenance/EstimationCost';
 import EstimationReport from '@/pages/maintenance/EstimationCostReport';
 import EstimationCostReportView from '@/pages/maintenance/EstimationCostReportView';
-import ComplaintForm from './pages/ComplaintForm';
-import ComplaintReport from './pages/branch/ComplaintReport';
-import BranchComplaintReport from './pages/maintenance/ComplaintReport';
+// import ComplaintForm from './pages/ComplaintForm';
+// import ComplaintReport from './pages/branch/ComplaintReport';
+// import BranchComplaintReport from './pages/maintenance/ComplaintReport';
 import MoveInOutReqForm from './pages/MoveInOutReqForm';
-import TechnicianComplaintReport from './pages/moveinout/technician/TechnicianComplaintReport';
-import CatTechMaintenance from './pages/CatTechMaintenance';
-import ComplaintChecklist from './pages/moveinout/technician/ComplaintChecklist';
-import CheckListView from './pages/maintenance/CheckListView';
+// import TechnicianComplaintReport from './pages/moveinout/technician/TechnicianComplaintReport';
+// import CatTechMaintenance from './pages/CatTechMaintenance';
+// import ComplaintChecklist from './pages/moveinout/technician/ComplaintChecklist';
+// import CheckListView from './pages/maintenance/CheckListView';
 import CheckListViewWrapper from './pages/maintenance/CheckListViewWrapper';
 
 function NotFound() {
