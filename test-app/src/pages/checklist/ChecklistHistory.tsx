@@ -58,15 +58,15 @@ export default function TechnicianDashboard() {
   }, [apiUrl, isTechnician, username]);
 
   // Fetch complaints (for pending complaints)
-  useEffect(() => {
-    const fetchComplaints = async () => {
-      const result = await getComplaints();
-      setComplaints(
-        (result.complaints || []).filter((c: any) => c.status === 'PENDING')
-      );
-    };
-    fetchComplaints();
-  }, []);
+  // useEffect(() => {
+  //   const fetchComplaints = async () => {
+  //     const result = await getComplaints();
+  //     setComplaints(
+  //       (result.complaints || []).filter((c: any) => c.status === 'PENDING')
+  //     );
+  //   };
+  //   fetchComplaints();
+  // }, []);
 
   const moveInCount = checklists.filter(c => c.visitType?.toLowerCase() === 'move in').length;
   const moveOutCount = checklists.filter(c => c.visitType?.toLowerCase() === 'move out').length;

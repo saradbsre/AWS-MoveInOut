@@ -195,7 +195,8 @@ export default function TenantReport() {
     setCurrentPage(maxPage);
   }
 }, [filteredChecklists.length]);
-  if (selectedChecklist) {
+  
+if (selectedChecklist) {
     return (
       <ReportView
         Reference={selectedChecklist.refNum}
