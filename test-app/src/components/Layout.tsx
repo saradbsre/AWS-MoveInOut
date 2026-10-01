@@ -37,7 +37,14 @@ export default function Layout() {
   const modules: Module[] = storedModules ? JSON.parse(storedModules) : [];
   const rawRole = sessionStorage.getItem('role') || '' ;
   const roleid = getRoleGroup(rawRole) || '';
-
+  const domain = localStorage.getItem('domain') || '';
+  const bsrecompany = domain.toLowerCase().includes('bsre');
+  const saeedcompany = domain.toLowerCase().includes('saeed');
+  const companyName = bsrecompany
+    ? 'ABDULWAHED AHMAD RASHED BIN SHABIB'
+    : saeedcompany
+      ? 'SAEED AHMAD RASHED BIN SHABIB'
+      : 'ABDULWAHED AHMAD RASHED BIN SHABIB';
 
 
   // const username = sessionStorage.getItem('username') || 'User';
@@ -262,7 +269,7 @@ const sendKeepAlive = useCallback(async () => {
                   style={{ maxWidth: '100%' }}
                   title="ABDULWAHED AHMAD RASHED BIN SHABIB"
                 >
-                  ABDULWAHED AHMAD RASHED BIN SHABIB
+                  {companyName}
                 </span>
               </a>
             </div>

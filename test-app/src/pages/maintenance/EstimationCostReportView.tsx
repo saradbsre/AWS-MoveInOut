@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import ReportHeader from '@/assets/bsreheader.png'
+import BSREReportHeader from '@/assets/bsreheader.png'
+import SAEEDReportHeader from '@/assets/saeedheader.png'
 import ReportFooter from '@/assets/bsrefooter.png'
 import { numberToWords } from '@/utils/NumbertoWordConverter';
 import '@/styles/EstimationReport.css'
@@ -161,6 +162,14 @@ export default function EstimationCostReport() {
   const totalAmount = equipment.reduce((sum: number, item: any) => sum + (parseFloat(item.amt) || 0), 0);
   const vatamount = equipment.reduce((sum: number, item: any) => sum + (parseFloat(item.taxValue) || 0), 0);
   const grandtotal = equipment.reduce((sum: number, item: any) => sum + (parseFloat(item.amtTotalWithTax) || 0), 0);
+  const domain = localStorage.getItem('domain') || '';
+  const bsrecompany = domain.toLowerCase().includes('bsre');
+  const saeedcompany = domain.toLowerCase().includes('saeed');
+  const ReportHeader = bsrecompany
+    ? BSREReportHeader
+    : saeedcompany
+      ? SAEEDReportHeader
+      : BSREReportHeader;
 
   return (
     <div className="print-container">

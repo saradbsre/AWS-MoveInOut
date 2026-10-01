@@ -3,7 +3,8 @@ import Barcode from 'react-barcode';
 import JsBarcode from 'jsbarcode';
 import { formatDateShort, formatDateTimeLong, getCurrentDateBarcode } from '@/utils/DateFormat';
 // import { SelectedItem } from '@/components/moveinoutcomponents/EquipmentSection';
-import ReportHeader from '@/assets/bsreheader.png'
+import BSREReportHeader from '@/assets/bsreheader.png'
+import SAEEDReportHeader from '@/assets/saeedheader.png'
 import EstimationCost from '@/pages/maintenance/EstimationCost';
 import PageLoader from '@/components/PageLoader';
 import '@/styles/Moveinout.css'
@@ -65,6 +66,14 @@ export default function ReportView({ Reference, onNewChecklist, fromHistory }: R
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const barcodeValue = reportData ? `${reportData.visitType}-${reportData.contractNo}-${getCurrentDateBarcode()}` : '';
   const apiUrl = import.meta.env.VITE_API_URL;
+  const domain = localStorage.getItem('domain') || '';
+  const bsrecompany = domain.toLowerCase().includes('bsre');
+  const saeedcompany = domain.toLowerCase().includes('saeed');
+  const ReportHeader = bsrecompany
+    ? BSREReportHeader
+    : saeedcompany
+      ? SAEEDReportHeader
+      : BSREReportHeader;
 
   function createPageFooter(): void {
       // Remove any existing footer elements and styles

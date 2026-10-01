@@ -43,7 +43,7 @@ export default function LoginForm() {
     }
 
     try {
-      // const domain = 'portal.bsre.abdulwahedbinshabibproperty.com';
+      // const domain = 'portal.saeed.abdulwahedbinshabibproperty.com';
       const domain = window.location.hostname;
       await axios.post(`${apiUrl}/api/auth/initializeCompany`, { domain }, { withCredentials: true });
       const res = await login({ username, password });
@@ -56,6 +56,7 @@ export default function LoginForm() {
         sessionStorage.setItem('userAccess', JSON.stringify(res.access));
         sessionStorage.setItem('userModules', JSON.stringify(res.modules));
         sessionStorage.setItem('defaultModule', res.DefaultMod || 'dashboard');
+        localStorage.setItem('domain', domain);
         if (res.tenantName) {
           sessionStorage.setItem('tenantName', res.tenantName);
         }
