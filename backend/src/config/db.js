@@ -33,6 +33,7 @@ async function connectMaster() {
 const userPools = new Map(); // key: server|database|user
 
 function parseConnectionString(connString) {
+  console.log('Parsing connection string:', connString);
   const parts = {};
   connString.split(';').forEach(part => {
     const idx = part.indexOf('=');
@@ -43,6 +44,7 @@ function parseConnectionString(connString) {
   });
 
   const dataSource = parts['datasource'] || parts['server'] || '';
+  console.log('Parsed data source:', dataSource);
   const [serverHost, serverPort] = dataSource.split(',');
 
   return {
@@ -56,6 +58,7 @@ function parseConnectionString(connString) {
 
 async function connectUser(connString) {
   const conn = parseConnectionString(connString);
+  console.log('Connecting user with config:', conn);
   const key = `${conn.server}|${conn.port}|${conn.database}|${conn.user}`;
 
   if (userPools.has(key)) {
