@@ -40,11 +40,14 @@ export default function Layout() {
   const domain = localStorage.getItem('domain') || '';
   const bsrecompany = domain.toLowerCase().includes('bsre');
   const saeedcompany = domain.toLowerCase().includes('saeed');
+  const hamdacompany = domain.toLowerCase().includes('hamda');
   const companyName = bsrecompany
     ? 'ABDULWAHED AHMAD RASHED BIN SHABIB'
     : saeedcompany
       ? 'SAEED AHMAD RASHED BIN SHABIB'
-      : 'ABDULWAHED AHMAD RASHED BIN SHABIB';
+      : hamdacompany
+        ? 'HAMDA AHMAD RASHED BIN SHABIB'
+        : 'ABDULWAHED AHMAD RASHED BIN SHABIB';
 
 
   // const username = sessionStorage.getItem('username') || 'User';

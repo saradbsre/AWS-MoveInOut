@@ -5,9 +5,11 @@ import { formatDateShort, formatDateTimeLong, getCurrentDateBarcode } from '@/ut
 // import { SelectedItem } from '@/components/moveinoutcomponents/EquipmentSection';
 import BSREReportHeader from '@/assets/bsreheader.png'
 import SAEEDReportHeader from '@/assets/saeedheader.png'
+import HAMDAReportHeader from '@/assets/hamdaheader.png'
 import EstimationCost from '@/pages/maintenance/EstimationCost';
 import PageLoader from '@/components/PageLoader';
 import '@/styles/Moveinout.css'
+import { placeSignaturesAtBottom } from '@/utils/placeSignaturesAtBottom'
 import axios from 'axios'
 
 interface EquipmentItem {
@@ -69,11 +71,14 @@ export default function ReportView({ Reference, onNewChecklist, fromHistory }: R
   const domain = localStorage.getItem('domain') || '';
   const bsrecompany = domain.toLowerCase().includes('bsre');
   const saeedcompany = domain.toLowerCase().includes('saeed');
+  const hamdacompany = domain.toLowerCase().includes('hamda');
   const ReportHeader = bsrecompany
     ? BSREReportHeader
     : saeedcompany
       ? SAEEDReportHeader
-      : BSREReportHeader;
+      : hamdacompany
+        ? HAMDAReportHeader
+        : BSREReportHeader;
 
   function createPageFooter(): void {
       // Remove any existing footer elements and styles
@@ -225,11 +230,13 @@ useEffect(() => {
     createPageFooter();
     // Small delay to ensure footer is rendered
     setTimeout(() => {
+      const restoreSignatures = placeSignaturesAtBottom();
       window.print();
       // Clean up after printing
       setTimeout(() => {
         const footers = document.querySelectorAll('.dynamic-page-footer');
         footers.forEach(footer => footer.remove());
+        restoreSignatures();
       }, 1000);
     }, 100);
   };
@@ -378,11 +385,11 @@ useEffect(() => {
             />
           </div>
           {/* Header */}
-          <div className="flex items-center justify-between my-4 relative">
+          <div className="flex items-center justify-between my-3 relative">
             {/* Left spacer */}
             <div className="flex-1" />
             {/* Centered title */}
-            <div className="flex items-center justify-center my-4 relative">
+            <div className="flex items-center justify-center my-3 relative">
               <h1 className="text-sm sm:text-base lg:text-lg font-bold text-black text-center">
                 Checklist Report
               </h1>
@@ -540,6 +547,8 @@ useEffect(() => {
           )}
         {/* <div className="flex-grow"> */}
         {/* Signatures at bottom of page */}
+        <div className="signature-page-bottom w-full">
+        <div className="blank-page-note">This space is intentionally left blank</div>
         <div className="signatures-bottom flex flex-col sm:flex-row justify-between items-start w-full">
           {/* Tenant Signature Box - Left */}
           <div className="flex flex-col items-start">
@@ -575,6 +584,7 @@ useEffect(() => {
               )}
             </div>
           </div>
+        </div>
         </div>
       </div>
       {/* </div>    */}

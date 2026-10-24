@@ -1,0 +1,123 @@
+@media print {
+  
+body {
+  visibility: hidden;
+  counter-reset: page;
+}
+table {
+  /* page-break-inside: avoid; */
+}
+tr {
+  page-break-inside: avoid;
+}
+@page {
+  size: A4;
+  /* margin: 15mm 10mm 20mm 10mm; */
+}
+img {
+  max-width: 100%;
+}
+.no-print {
+  display: none;
+} 
+.print-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  padding-bottom: 25mm;
+  box-shadow: none;
+  border: none;
+  background: white;
+  color: black;
+  /* display: flex;
+  flex-direction: column;
+  min-height: 100vh; */
+}
+.print-container, .print-container * {
+  visibility: visible !important;
+}
+.content-wrapper {
+  flex: 1 0;
+}
+.barcode-print-size {
+  width: 180px;
+  height: 40px;
+  max-width: 180px;
+  max-height: 40px;
+}
+.barcode-print-only {
+  display: flex !important;
+}
+/* Equipment table column widths for print */
+.min-w-full.table-fixed th:nth-child(1),
+.min-w-full.table-fixed td:nth-child(1) {
+  width: 5%;
+  max-width: 5%;
+} 
+.min-w-full.table-fixed th:nth-child(2),
+.min-w-full.table-fixed td:nth-child(2) {
+  width: 40%;
+  max-width: 40%;
+}
+.min-w-full.table-fixed th:nth-child(3),
+.min-w-full.table-fixed td:nth-child(3) {
+  width: 5%;
+  max-width: 5%;
+}
+.min-w-full.table-fixed th:nth-child(4),
+.min-w-full.table-fixed td:nth-child(4) {
+  width: 10%;
+  max-width: 10%;
+}
+.min-w-full.table-fixed th:nth-child(5),
+.min-w-full.table-fixed td:nth-child(5) {
+  width: 10%;
+  max-width: 10%;
+}
+.min-w-full.table-fixed th:nth-child(6),
+.min-w-full.table-fixed td:nth-child(6) {
+  width: 30%;
+  max-width: 30%;
+}
+/* .print-signature-footer {
+  display: block !important;
+  width: 100%;
+  background: white;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  position: static;
+} */
+/* .signatures-bottom {
+  flex-shrink: 0; 
+  margin-top: auto; 
+  page-break-inside: avoid;
+  page-break-before: always;
+} */
+/* .flex-grow{
+  margin-bottom: 10rem;
+} */
+ .min-w-full.table-fixed td:nth-child(2), .min-w-full.table-fixed th:nth-child(2) { 
+  white-space: normal !important; 
+  word-break: break-word; 
+  overflow-wrap: anywhere; }
+}
+/* Normal view styles */
+.barcode-print-only {
+  display: none;
+}
+.for-pdf-capture {
+  height: auto !important;
+  overflow: visible !important;
+  position: static !important;
+  padding: 20px !important;
+}
+
+/* For All */
+.no-wrap-table th,
+.no-wrap-table td {
+  white-space: nowrap;
+}

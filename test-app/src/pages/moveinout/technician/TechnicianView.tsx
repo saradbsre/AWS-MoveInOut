@@ -7,6 +7,7 @@ import ReportHeader from '@/assets/bsreheader.png'
 import EstimationCost from '@/pages/maintenance/EstimationCost';
 import PageLoader from '@/components/PageLoader';
 import '@/styles/Moveinout.css'
+import { placeSignaturesAtBottom } from '@/utils/placeSignaturesAtBottom'
 import axios from 'axios'
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -216,11 +217,13 @@ useEffect(() => {
     createPageFooter();
     // Small delay to ensure footer is rendered
     setTimeout(() => {
+      const restoreSignatures = placeSignaturesAtBottom();
       window.print();
       // Clean up after printing
       setTimeout(() => {
         const footers = document.querySelectorAll('.dynamic-page-footer');
         footers.forEach(footer => footer.remove());
+        restoreSignatures();
       }, 1000);
     }, 100);
   };
@@ -543,6 +546,8 @@ useEffect(() => {
           )}
         {/* <div className="flex-grow"> */}
         {/* Signatures at bottom of page */}
+        <div className="signature-page-bottom w-full">
+        <div className="blank-page-note">This page is intentionally left blank</div>
         <div className="signatures-bottom flex flex-col sm:flex-row justify-between items-start w-full">
           {/* Tenant Signature Box - Left */}
           <div className="flex flex-col items-start">
@@ -578,6 +583,7 @@ useEffect(() => {
               )}
             </div>
           </div>
+        </div>
         </div>
       </div>
       {/* </div>    */}

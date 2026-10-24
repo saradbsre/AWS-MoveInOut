@@ -12,7 +12,7 @@ tr {
 }
 @page {
   size: A4;
-  /* margin: 15mm 10mm 20mm 10mm; */
+  margin: 10mm 10mm 20mm 10mm; /* keep in sync with utils/placeSignaturesAtBottom.ts */
 }
 img {
   max-width: 100%;
@@ -91,6 +91,36 @@ img {
   padding: 0;
   position: static;
 } */
+/* Signatures: always start on a new page and sit at the bottom of it.
+   Top of that page is intentionally left blank. */
+.signature-page-bottom {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+/* Used only when the signatures don't fit on the last page: own page, bottom aligned */
+.signature-page-bottom.sig-own-page {
+  break-before: page;
+  page-break-before: always;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 240mm; /* usable height 267mm minus the 25mm bottom padding of .print-container, with spare */
+}
+.signature-page-bottom .signatures-bottom {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+}
+.signature-page-bottom.sig-own-page .blank-page-note {
+  display: flex !important;
+  flex: 1;                    /* takes the free space, so the text sits in the page middle */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 14px;
+  font-style: italic;
+  color: #555;
+}
 /* .signatures-bottom {
   flex-shrink: 0; 
   margin-top: auto; 
@@ -120,4 +150,9 @@ img {
 .no-wrap-table th,
 .no-wrap-table td {
   white-space: nowrap;
+}
+
+/* Hidden on screen, shown only when printing */
+.blank-page-note {
+  display: none;
 }
