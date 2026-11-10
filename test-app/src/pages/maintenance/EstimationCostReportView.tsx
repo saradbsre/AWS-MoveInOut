@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import BSREReportHeader from '@/assets/bsreheader.png'
 import SAEEDReportHeader from '@/assets/saeedheader.png'
 import HAMDAReportHeader from '@/assets/hamdaheader.png'
+import CSReportHeader from '@/assets/csheader.png'
 import ReportFooter from '@/assets/bsrefooter.png'
 import { numberToWords } from '@/utils/NumbertoWordConverter';
 import '@/styles/EstimationReport.css'
@@ -167,13 +168,16 @@ export default function EstimationCostReport() {
   const bsrecompany = domain.toLowerCase().includes('bsre');
   const saeedcompany = domain.toLowerCase().includes('saeed');
   const hamdacompany = domain.toLowerCase().includes('hamda');
+  const cscompany = domain.toLowerCase().includes('cs');
   const ReportHeader = bsrecompany
     ? BSREReportHeader
     : saeedcompany
       ? SAEEDReportHeader
       : hamdacompany
         ? HAMDAReportHeader
-        : BSREReportHeader;
+        : cscompany
+          ? CSReportHeader
+          : BSREReportHeader;
 
   return (
     <div className="print-container">

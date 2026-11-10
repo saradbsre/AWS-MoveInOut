@@ -41,13 +41,16 @@ export default function Layout() {
   const bsrecompany = domain.toLowerCase().includes('bsre');
   const saeedcompany = domain.toLowerCase().includes('saeed');
   const hamdacompany = domain.toLowerCase().includes('hamda');
+  const cscompany = domain.toLowerCase().includes('cs');
   const companyName = bsrecompany
     ? 'ABDULWAHED AHMAD RASHED BIN SHABIB'
     : saeedcompany
       ? 'SAEED AHMAD RASHED BIN SHABIB'
       : hamdacompany
         ? 'HAMDA AHMAD RASHED BIN SHABIB'
-        : 'ABDULWAHED AHMAD RASHED BIN SHABIB';
+        : cscompany
+          ? 'ABDULWAHED BINSHABIB COLD STORAGE LLC'
+          : 'ABDULWAHED AHMAD RASHED BIN SHABIB';
 
 
   // const username = sessionStorage.getItem('username') || 'User';

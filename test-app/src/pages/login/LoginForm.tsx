@@ -43,7 +43,7 @@ export default function LoginForm() {
     }
 
     try {
-      //const domain = 'portal..abdulwahedbinshabibproperty.com';
+      //const domain = 'portal.cs.abdulwahedbinshabibproperty.com';
       const domain = window.location.hostname;
       await axios.post(`${apiUrl}/api/auth/initializeCompany`, { domain }, { withCredentials: true });
       const res = await login({ username, password });

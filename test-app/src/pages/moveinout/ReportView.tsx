@@ -6,6 +6,7 @@ import { formatDateShort, formatDateTimeLong, getCurrentDateBarcode } from '@/ut
 import BSREReportHeader from '@/assets/bsreheader.png'
 import SAEEDReportHeader from '@/assets/saeedheader.png'
 import HAMDAReportHeader from '@/assets/hamdaheader.png'
+import CSReportHeader from '@/assets/csheader.png'
 import EstimationCost from '@/pages/maintenance/EstimationCost';
 import PageLoader from '@/components/PageLoader';
 import '@/styles/Moveinout.css'
@@ -72,13 +73,16 @@ export default function ReportView({ Reference, onNewChecklist, fromHistory }: R
   const bsrecompany = domain.toLowerCase().includes('bsre');
   const saeedcompany = domain.toLowerCase().includes('saeed');
   const hamdacompany = domain.toLowerCase().includes('hamda');
+  const cscompany = domain.toLowerCase().includes('cs');
   const ReportHeader = bsrecompany
     ? BSREReportHeader
     : saeedcompany
       ? SAEEDReportHeader
       : hamdacompany
         ? HAMDAReportHeader
-        : BSREReportHeader;
+        : cscompany
+          ? CSReportHeader
+          : BSREReportHeader;
 
   function createPageFooter(): void {
       // Remove any existing footer elements and styles
