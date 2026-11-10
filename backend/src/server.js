@@ -42,7 +42,7 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? ['https://portal.bsre.abdulwahedbinshabibproperty.com', 'https://portal.saeed.abdulwahedbinshabibproperty.com',
       'https://portal.hamda.abdulwahedbinshabibproperty.com', 'https://aws-moveinout.onrender.com',
-      'https://portal.bsre.abdulwahedbinshabibproperty.com']
+      'https://portal.cs.abdulwahedbinshabibproperty.com']
     : true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
