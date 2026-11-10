@@ -9,10 +9,11 @@ const masterConfig = {
   password: process.env.SQL_PASSWORD,
   server: process.env.SQL_SERVER,
   database: process.env.SQL_DATABASE, // CENTRALIZEDDB
+  port: Number(process.env.SQL_PORT) || 1450,
   options: { encrypt: false, trustServerCertificate: true, enableArithAbort: true },
   pool: { max: 50, min: 5, idleTimeoutMillis: 60000, acquireTimeoutMillis: 30000 }
 };
-
+console.log('Master DB config:', masterConfig);
 let masterPool = null;
 
 async function connectMaster() {
@@ -33,7 +34,6 @@ async function connectMaster() {
 const userPools = new Map(); // key: server|database|user
 
 function parseConnectionString(connString) {
-  console.log('Parsing connection string:', connString);
   const parts = {};
   connString.split(';').forEach(part => {
     const idx = part.indexOf('=');
@@ -44,7 +44,6 @@ function parseConnectionString(connString) {
   });
 
   const dataSource = parts['datasource'] || parts['server'] || '';
-  console.log('Parsed data source:', dataSource);
   const [serverHost, serverPort] = dataSource.split(',');
 
   return {
@@ -58,7 +57,6 @@ function parseConnectionString(connString) {
 
 async function connectUser(connString) {
   const conn = parseConnectionString(connString);
-  console.log('Connecting user with config:', conn);
   const key = `${conn.server}|${conn.port}|${conn.database}|${conn.user}`;
 
   if (userPools.has(key)) {
